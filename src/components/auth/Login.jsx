@@ -48,29 +48,60 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h1 className="text-center mb-4">Admin Login</h1>
-        {error && <div className="alert alert-danger">{error}</div>}
+        <div className="text-center mb-4">
+          <div className="brand-logo mb-3">
+            <i className="bi bi-shield-lock" style={{ fontSize: '3rem', color: 'var(--primary-color)' }}></i>
+          </div>
+          <h1 className="fw-bold">Admin Login</h1>
+          <p className="text-muted">Enter your authentication code to continue</p>
+        </div>
+        
+        {error && (
+          <div className="alert alert-danger d-flex align-items-center" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>{error}</div>
+          </div>
+        )}
+        
         <form onSubmit={handleLogin}>
-          <div className="mb-3">
+          <div className="mb-4">
             <label htmlFor="authCode" className="form-label">Authentication Code</label>
-            <input 
-              type="password"
-              className="form-control"
-              id="authCode"
-              value={authCode}
-              onChange={(e) => setAuthCode(e.target.value)}
-              placeholder="Enter your admin authentication code"
-              autoComplete="off"
-            />
+            <div className="input-group">
+              <span className="input-group-text bg-light border-end-0">
+                <i className="bi bi-key"></i>
+              </span>
+              <input 
+                type="password"
+                className="form-control border-start-0 ps-0"
+                id="authCode"
+                value={authCode}
+                onChange={(e) => setAuthCode(e.target.value)}
+                placeholder="Enter admin code"
+                autoComplete="off"
+              />
+            </div>
           </div>
           <button 
             type="submit" 
-            className="btn btn-primary w-100"
+            className="btn btn-primary w-100 py-2 mb-3"
             disabled={loading}
           >
-            {loading ? 'Authenticating...' : 'Login'}
+            {loading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Authenticating...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-box-arrow-in-right me-2"></i>
+                Login
+              </>
+            )}
           </button>
         </form>
+        <div className="text-center mt-4">
+          <small className="text-muted">TeamLexia Admin Panel © 2025</small>
+        </div>
       </div>
     </div>
   );

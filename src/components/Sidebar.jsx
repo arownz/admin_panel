@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button, Modal } from 'react-bootstrap';  // Add Modal import
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -49,6 +50,9 @@ const Sidebar = () => {
       <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <h3 className={collapsed ? 'd-none' : ''}>TeamLexia Admin</h3>
+          <div className="ms-auto me-2">
+            <ThemeToggle />
+          </div>
           <Button 
             variant="link" 
             className="toggle-btn p-0 text-white" 

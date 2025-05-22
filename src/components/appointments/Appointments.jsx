@@ -87,10 +87,10 @@ const Appointments = () => {
                   onChange={handleStatusChange}
                 >
                   <option value="all">All Statuses</option>
-                  <option value="scheduled">Scheduled</option>
-                  <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                   <option value="pending">Pending</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="completed">Completed</option>
                 </select>
               </div>
               <div className="search-bar">

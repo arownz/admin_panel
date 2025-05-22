@@ -114,28 +114,6 @@ const UserForm = () => {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Name*</Form.Label> {/* Changed from Username to Name */}
-                      <Form.Control
-                        type="text"
-                        name="name"  
-                        value={formData.name}  
-                        onChange={handleChange}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Email*</Form.Label>
-                      <Form.Control
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        readOnly={isEditMode}  // Don't allow email changes in edit mode
-                      />
                     </Form.Group>
                   </Col>
                 </Row>
@@ -151,7 +129,6 @@ const UserForm = () => {
                       >
                         <option value="parent">Parent</option>
                         <option value="professional">Professional</option>
-                        <option value="admin">Admin</option>
                       </Form.Select>
                     </Form.Group>
                   </Col>
@@ -165,7 +142,6 @@ const UserForm = () => {
                         onChange={handleChange}
                       >
                         <option value="active">Active</option>
-                        <option value="suspended">Suspended</option>
                         <option value="inactive">Inactive</option>
                       </Form.Select>
                     </Form.Group>
@@ -173,15 +149,7 @@ const UserForm = () => {
                 </Row>
                 
                 <Form.Group className="mb-3">
-                  <Form.Label>Profile Picture URL</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="photoUrl"  // Changed from profile_picture
-                    value={formData.photoUrl}  // Changed from profile_picture
-                    onChange={handleChange}
-                  />
                   <Form.Text className="text-muted">
-                    Enter a URL for the user's profile picture
                   </Form.Text>
                 </Form.Group>
                 

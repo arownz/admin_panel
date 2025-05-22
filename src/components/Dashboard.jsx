@@ -217,60 +217,57 @@ const Dashboard = () => {
           ) : (
             <>
               {/* Stats Cards */}
-              <Row className="mb-4">
-                <Col md={6} lg className="mb-3">
-                  <Card className="h-100 border-0 shadow-sm">
-                    <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center">
-                      <div className="stat-icon mb-2 rounded-circle bg-primary bg-opacity-10 p-3">
-                        <i className="bi bi-people text-primary fs-4"></i>
+              <Row className="g-3 mb-4">
+                <Col md={6} xl={3}>
+                  <Card className="stat-card h-100 border-0">
+                    <div className="d-flex align-items-center">
+                      <div className="stat-icon bg-primary-gradient me-3">
+                        <i className="bi bi-people-fill fs-4"></i>
                       </div>
-                      <h3 className="fs-1 fw-bold">{stats.users}</h3>
-                      <p className="text-muted mb-0">Total Users</p>
-                    </Card.Body>
+                      <div>
+                        <div className="stat-value display-6 fw-bold">{stats.users}</div>
+                        <div className="stat-label text-muted">Total Users</div>
+                      </div>
+                    </div>
                   </Card>
                 </Col>
-                <Col md={6} lg className="mb-3">
-                  <Card className="h-100 border-0 shadow-sm">
-                    <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center">
-                      <div className="stat-icon mb-2 rounded-circle bg-success bg-opacity-10 p-3">
-                        <i className="bi bi-calendar-check text-success fs-4"></i>
+                <Col md={6} xl={3}>
+                  <Card className="stat-card h-100 border-0">
+                    <div className="d-flex align-items-center">
+                      <div className="stat-icon bg-success-gradient me-3">
+                        <i className="bi bi-calendar-check-fill fs-4"></i>
                       </div>
-                      <h3 className="fs-1 fw-bold">{stats.appointments}</h3>
-                      <p className="text-muted mb-0">Appointments</p>
-                    </Card.Body>
+                      <div>
+                        <div className="stat-value display-6 fw-bold">{stats.appointments}</div>
+                        <div className="stat-label text-muted">Appointments</div>
+                      </div>
+                    </div>
                   </Card>
                 </Col>
-                <Col md={6} lg className="mb-3">
-                  <Card className="h-100 border-0 shadow-sm">
-                    <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center">
-                      <div className="stat-icon mb-2 rounded-circle bg-warning bg-opacity-10 p-3">
-                        <i className="bi bi-file-post text-warning fs-4"></i>
+                <Col md={6} xl={3}>
+                  <Card className="stat-card h-100 border-0">
+                    <div className="d-flex align-items-center">
+                      <div className="stat-icon bg-warning-gradient me-3">
+                        <i className="bi bi-file-post-fill fs-4"></i>
                       </div>
-                      <h3 className="fs-1 fw-bold">{stats.posts}</h3>
-                      <p className="text-muted mb-0">Posts</p>
-                    </Card.Body>
+                      <div>
+                        <div className="stat-value display-6 fw-bold">{stats.posts}</div>
+                        <div className="stat-label text-muted">Posts</div>
+                      </div>
+                    </div>
                   </Card>
                 </Col>
-                <Col md={6} lg className="mb-3">
-                  <Card className="h-100 border-0 shadow-sm">
-                    <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center">
-                      <div className="stat-icon mb-2 rounded-circle bg-danger bg-opacity-10 p-3">
-                        <i className="bi bi-flag text-danger fs-4"></i>
+                <Col md={6} xl={3}>
+                  <Card className="stat-card h-100 border-0">
+                    <div className="d-flex align-items-center">
+                      <div className="stat-icon bg-danger-gradient me-3">
+                        <i className="bi bi-flag-fill fs-4"></i>
                       </div>
-                      <h3 className="fs-1 fw-bold">{stats.reportedPosts}</h3>
-                      <p className="text-muted mb-0">Reported Posts</p>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col md={6} lg className="mb-3">
-                  <Card className="h-100 border-0 shadow-sm">
-                    <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center">
-                      <div className="stat-icon mb-2 rounded-circle bg-info bg-opacity-10 p-3">
-                        <i className="bi bi-chat-dots text-info fs-4"></i>
+                      <div>
+                        <div className="stat-value display-6 fw-bold">{stats.reportedPosts}</div>
+                        <div className="stat-label text-muted">Reported Posts</div>
                       </div>
-                      <h3 className="fs-1 fw-bold">{stats.activeChats}</h3>
-                      <p className="text-muted mb-0">Active Chats</p>
-                    </Card.Body>
+                    </div>
                   </Card>
                 </Col>
               </Row>
