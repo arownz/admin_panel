@@ -25,13 +25,37 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppRoutes() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/users" element={<Users />} />
-      <Route path="/users/:id" element={<UserDetail />} />
-      <Route path="/users/:id/edit" element={<UserForm />} />
+      <Route path="/login" element={
+        isAuthenticated ? <Navigate to="/" /> : <Login />
+      } />
+      
+      {/* Protect the Dashboard route */}
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      
+      {/* Other protected routes */}
+      <Route path="/users" element={
+        <ProtectedRoute>
+          <Users />
+        </ProtectedRoute>
+      } />
+      <Route path="/users/:id" element={
+        <ProtectedRoute>
+          <UserDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/users/:id/edit" element={
+        <ProtectedRoute>
+          <UserForm />
+        </ProtectedRoute>
+      } />
       
       {/* Appointment routes */}
       <Route path="/appointments" element={
@@ -58,8 +82,16 @@ function AppRoutes() {
       } />
       
       {/* Reported posts routes */}
-      <Route path="/reported-posts" element={<ReportedPosts />} />
-      <Route path="/reported-posts/:id" element={<ReportedPostDetail />} />
+      <Route path="/reported-posts" element={
+        <ProtectedRoute>
+          <ReportedPosts />
+        </ProtectedRoute>
+      } />
+      <Route path="/reported-posts/:id" element={
+        <ProtectedRoute>
+          <ReportedPostDetail />
+        </ProtectedRoute>
+      } />
       
       {/* Chats route */}
       <Route path="/chats" element={
@@ -68,7 +100,10 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      <Route path="*" element={<Navigate to="/" />} />
+      {/* Redirect any unknown paths to login or dashboard based on authentication */}
+      <Route path="*" element={
+        isAuthenticated ? <Navigate to="/" /> : <Navigate to="/login" />
+      } />
     </Routes>
   );
 }
