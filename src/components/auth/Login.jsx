@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
+import { useAuth } from '../../contexts/AuthContext'; // Updated path
 
 const Login = () => {
   const [authCode, setAuthCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { setIsAuthenticated } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   // Single admin authentication code
-  const ADMIN_CODE = 'FepaNKKk4nuElM4gG5Ai';  // Super Admin
+  const ADMIN_CODE = 'FepaNKKk4nuElM4gG5Ai';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,22 +25,16 @@ const Login = () => {
       setLoading(true);
       setError('');
       
-      // Check if the auth code is valid
       if (authCode.trim() === ADMIN_CODE) {
-        // Skip Firebase Auth for now and just use localStorage
-        localStorage.setItem('adminAuthCode', ADMIN_CODE);
-        localStorage.setItem('adminAuthTime', Date.now().toString());
-        
-        // Update authentication status and redirect
-        setIsAuthenticated(true);
+        login(ADMIN_CODE);
         navigate('/');
       } else {
         setError('Invalid authentication code');
       }
       
     } catch (err) {
-      console.error("Login error:", err);
-      setError('Authentication failed. Please try again.');
+      console.error('Login error:', err);
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -47,62 +42,66 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <div className="login-form">
-        <div className="text-center mb-4">
-          <div className="brand-logo mb-3">
-            <i className="bi bi-shield-lock" style={{ fontSize: '3rem', color: 'var(--primary-color)' }}></i>
-          </div>
-          <h1 className="fw-bold">Admin Login</h1>
-          <p className="text-muted">Enter your authentication code to continue</p>
-        </div>
-        
-        {error && (
-          <div className="alert alert-danger d-flex align-items-center" role="alert">
-            <i className="bi bi-exclamation-triangle-fill me-2"></i>
-            <div>{error}</div>
-          </div>
-        )}
-        
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label htmlFor="authCode" className="form-label">Authentication Code</label>
-            <div className="input-group">
-              <span className="input-group-text bg-light border-end-0">
-                <i className="bi bi-key"></i>
-              </span>
-              <input 
-                type="password"
-                className="form-control border-start-0 ps-0"
-                id="authCode"
-                value={authCode}
-                onChange={(e) => setAuthCode(e.target.value)}
-                placeholder="Enter admin code"
-                autoComplete="off"
-              />
+      <Card className="login-form">
+        <Card.Body className="p-4">
+          <div className="text-center mb-4">
+            {/* Large Lock Icon */}
+            <div className="admin-icon mb-3">
+              <i className="bi bi-shield-lock-fill"></i>
             </div>
+            <h1 className="display-6 fw-bold mb-2">TeamLexia Admin</h1>
+            <p className="text-muted fs-6">Enter your authentication code to access the admin panel</p>
           </div>
-          <button 
-            type="submit" 
-            className="btn btn-primary w-100 py-2 mb-3"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Authenticating...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-box-arrow-in-right me-2"></i>
-                Login
-              </>
-            )}
-          </button>
-        </form>
-        <div className="text-center mt-4">
-          <small className="text-muted">TeamLexia Admin Panel © 2025</small>
-        </div>
-      </div>
+
+          {error && (
+            <Alert variant="danger" className="mb-3">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {error}
+            </Alert>
+          )}
+
+          <Form onSubmit={handleLogin}>
+            <Form.Group className="mb-3">
+              <Form.Label className="fs-6 fw-semibold">Authentication Code</Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <i className="bi bi-key-fill text-primary"></i>
+                </span>
+                <Form.Control
+                  type="password"
+                  placeholder="Enter your admin code"
+                  value={authCode}
+                  onChange={(e) => setAuthCode(e.target.value)}
+                  disabled={loading}
+                  autoFocus
+                  className="form-control-lg border-start-0"
+                  style={{ fontSize: '1rem' }}
+                />
+              </div>
+            </Form.Group>
+
+            <Button 
+              variant="primary" 
+              type="submit" 
+              className="w-100 btn-lg py-2"
+              disabled={loading}
+              style={{ fontSize: '1.1rem' }}
+            >
+              {loading ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Authenticating...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-box-arrow-in-right me-2"></i>
+                  Login to Admin Panel
+                </>
+              )}
+            </Button>
+          </Form>
+        </Card.Body>
+      </Card>
     </div>
   );
 };

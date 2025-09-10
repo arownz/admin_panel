@@ -1,25 +1,30 @@
-import { initializeApp } from 'firebase/app';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
-// Your Firebase configuration - try with this exact key from your screenshot
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDfLGkJyubOLcOIVMPry7NfkwKmQGP4Zs4",
-  authDomain: "teamlexia-46228.firebaseapp.com",
-  projectId: "teamlexia-46228",
-  storageBucket: "teamlexia-46228.appspot.com", // Note: this might be different from what you have
-  messagingSenderId: "746497205021",
-  appId: "1:746497205021:web:b5bcd2a71f9ca0d022b7f4",
-  measurementId: "G-XYC2PLJV9J"
+  apiKey: "AIzaSyAfTfsrJbyG5-4jmJUPh3saHdzAYky7xdg",
+  authDomain: "gamedevcapz.firebaseapp.com",
+  databaseURL: "https://gamedevcapz-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "gamedevcapz",
+  storageBucket: "gamedevcapz.firebasestorage.app",
+  messagingSenderId: "77421098859",
+  appId: "1:77421098859:web:8df7c960ea08bd6a7bfe2e",
+  measurementId: "G-6M6YEPK47E"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // Initialize services
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-export { app, db, auth, storage };
+export { app, db, auth, storage, analytics };

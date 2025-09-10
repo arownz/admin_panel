@@ -1,375 +1,321 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Card, Button, Form, Modal } from 'react-bootstrap';
+import { Container, Card, Table, Button, Form, Badge, Spinner, Alert } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
-import { deleteUser, getUsersRealtime } from '../../firebase/services';
+import { useSidebar } from '../../contexts/SidebarContext';
+import { getUsersRealtime, updateUserStatus, deleteUser } from '../../firebase/services';
 
 const Users = () => {
+  const { isCollapsed } = useSidebar();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [userTypeFilter, setUserTypeFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [verificationFilter, setVerificationFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
-    let unsubscribe;
-    
-    const setupRealtimeListener = () => {
-      try {
-        setLoading(true);
-        unsubscribe = getUsersRealtime((usersData) => {
-          console.log("Received users data:", usersData);
-          setUsers(usersData);
-          applyFilters(usersData, searchTerm, userTypeFilter);
-          setLoading(false);
-        });
-      } catch (err) {
-        console.error("Error setting up users listener:", err);
-        setError("Failed to load users. Please refresh the page.");
-        setLoading(false);
+    const unsubscribe = getUsersRealtime((usersData) => {
+      console.log("Users data received:", usersData);
+      setUsers(usersData);
+      setLoading(false);
+    });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
       }
     };
-    
-    setupRealtimeListener();
-    
-    // Cleanup function
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [searchTerm, userTypeFilter]);
+  }, []);
 
-  // Update the applyFilters function
-  const applyFilters = (usersData, search, typeFilter) => {
-    console.log("Filtering users data:", usersData);
-    
-    // Sort users by creation date (latest first)
-    // This serves as a backup for the Firestore orderBy
-    let sorted = [...usersData].sort((a, b) => {
-      // Handle different timestamp formats
-      const getTimestamp = (user) => {
-        if (!user.createdAt) return 0;
-        
-        if (typeof user.createdAt.toDate === 'function') {
-          return user.createdAt.toDate().getTime();
-        }
-        
-        if (user.createdAt.seconds) {
-          return user.createdAt.seconds * 1000;
-        }
-        
-        return new Date(user.createdAt).getTime();
-      };
-      
-      return getTimestamp(b) - getTimestamp(a); // Descending order (newest first)
-    });
-    
-    let filtered = sorted;
-    
-    // Apply search filter - focus on name, email and childName
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filtered = filtered.filter(user => 
-        user.name?.toLowerCase().includes(searchLower) ||
-        user.email?.toLowerCase().includes(searchLower) ||
-        user.childName?.toLowerCase().includes(searchLower)
+  useEffect(() => {
+    let filtered = [...users];
+
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(user => user.role === roleFilter);
+    }
+
+    if (verificationFilter !== 'all') {
+      if (verificationFilter === 'verified') {
+        filtered = filtered.filter(user => user.isVerified || user.verificationStatus === 'verified');
+      } else if (verificationFilter === 'unverified') {
+        filtered = filtered.filter(user => !user.isVerified && user.verificationStatus !== 'verified');
+      }
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(user =>
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.profession?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.affiliation?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
-    // Apply user type filter based on role
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(user => user.role === typeFilter);
-    }
-    
-    console.log("Filtered users:", filtered);
+
     setFilteredUsers(filtered);
-  };
+  }, [users, roleFilter, verificationFilter, searchTerm]);
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
-    const newSearchTerm = e.target.value;
-    setSearchTerm(newSearchTerm);
-    applyFilters(users, newSearchTerm, userTypeFilter);
-  };
-
-  // Handle user type filter change
-  const handleTypeFilterChange = (e) => {
-    const newTypeFilter = e.target.value;
-    setUserTypeFilter(newTypeFilter);
-    applyFilters(users, searchTerm, newTypeFilter);
-  };
-
-  // Handle user deletion
-  const handleDeleteClick = (user) => {
-    setUserToDelete(user);
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!userToDelete) return;
-    
-    try {
-      await deleteUser(userToDelete.id);
-      setShowDeleteModal(false);
-      setUserToDelete(null);
-    } catch (err) {
-      console.error("Error deleting user:", err);
-      setError(`Failed to delete user: ${err.message}`);
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setShowDeleteModal(false);
-    setUserToDelete(null);
-  };
-
-  // Get profile picture
-  const getProfilePicture = (user) => {
-    return user.photoUrl || '';
-  };
-
-  // Get user display name - prioritize the name field
-  const getUserDisplayName = (user) => {
-    return user.name || user.email?.split('@')[0] || 'Anonymous User';
-  };
-
-  // Get user type text
-  const getUserTypeText = (user) => {
-    if (user.role) {
-      return user.role.charAt(0).toUpperCase() + user.role.slice(1);
-    }
-    return 'Unknown';
-  };
-
-  // Get user status badge class
-  const getStatusBadgeClass = (status) => {
-    switch(status) {
-      case 'active': return 'bg-success';
-      case 'suspended': return 'bg-warning';
-      case 'inactive': return 'bg-secondary';
-      default: return 'bg-secondary';
-    }
-  };
-
-  // Format date - display more readable dates for recent entries
   const formatDate = (timestamp) => {
-    if (!timestamp) return 'Never';
+    if (!timestamp) return 'N/A';
     
     try {
       let date;
-      
-      // Handle Firestore Timestamp objects
       if (typeof timestamp.toDate === 'function') {
         date = timestamp.toDate();
-      }
-      // Handle timestamp objects with seconds and nanoseconds
-      else if (timestamp.seconds) {
+      } else if (timestamp.seconds) {
         date = new Date(timestamp.seconds * 1000);
-      }
-      // Already a date or timestamp string
-      else {
+      } else {
         date = new Date(timestamp);
       }
       
-      // Check if the date is valid
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
-      }
+      if (isNaN(date.getTime())) return 'Invalid date';
       
-      const now = new Date();
-      const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-      
-      // For recent dates (less than 7 days ago), show relative time
-      if (diffDays < 7) {
-        const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
-        if (diffDays === 0) {
-          return 'Today at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        } else if (diffDays === 1) {
-          return 'Yesterday at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        } else {
-          return rtf.format(-diffDays, 'day');
-        }
-      }
-      
-      // For older dates, show the date
-      return date.toLocaleDateString([], {
+      return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       });
     } catch (error) {
-      console.error("Error formatting date:", error);
       return 'Invalid date';
     }
   };
 
+  const getVerificationBadge = (user) => {
+    if (user.isVerified || user.verificationStatus === 'verified') {
+      return <Badge bg="success">✓ Verified</Badge>;
+    }
+    if (user.verificationStatus === 'pending') {
+      return <Badge bg="warning">⏳ Pending</Badge>;
+    }
+    if (user.verificationStatus === 'rejected') {
+      return <Badge bg="danger">✗ Rejected</Badge>;
+    }
+    return <Badge bg="secondary">Unverified</Badge>;
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await deleteUser(userId);
+        setError(null);
+      } catch (err) {
+        console.error('Error deleting user:', err);
+        setError('Failed to delete user');
+      }
+    }
+  };
+
+  const handleStatusChange = async (userId, newStatus) => {
+    try {
+      await updateUserStatus(userId, newStatus);
+      setError(null);
+    } catch (err) {
+      console.error('Error updating user status:', err);
+      setError('Failed to update user status');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-container">
+        <Sidebar />
+        <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+          <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+            <div className="text-center">
+              <Spinner animation="border" variant="primary" />
+              <div className="mt-3">Loading users...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-container">
       <Sidebar />
-      <div className="main-content">
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1 className="m-0">Users</h1>
+            <h1>
+              <i className="bi bi-people me-2"></i>
+              User Management
+            </h1>
           </div>
+
+          {error && (
+            <Alert variant="danger" onClose={() => setError(null)} dismissible>
+              {error}
+            </Alert>
+          )}
           
-          {error && <div className="alert alert-danger">{error}</div>}
-          
-          <Card className="border-0 shadow-sm mb-4">
+          <Card className="border-0 shadow-sm">
             <Card.Body>
-              <div className="d-flex justify-content-between align-items-center flex-wrap mb-3">
-                <div className="d-flex align-items-center mb-2 mb-md-0">
-                  <Form.Group className="me-3" style={{minWidth: '200px'}}>
-                    <Form.Control
-                      type="text"
-                      placeholder="Search users..."
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
-                  </Form.Group>
+              <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div className="d-flex align-items-center gap-2 mb-2 mb-md-0">
+                  <Form.Control
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ width: '250px' }}
+                  />
                   
-                  <Form.Group style={{minWidth: '150px'}}>
-                    <Form.Select 
-                      value={userTypeFilter} 
-                      onChange={handleTypeFilterChange}
-                    >
-                      <option value="all">All Users</option>
-                      <option value="parent">Parents</option>
-                      <option value="professional">Professionals</option>
-                    </Form.Select>
-                  </Form.Group>
+                  <Form.Select 
+                    value={roleFilter} 
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    style={{ width: '150px' }}
+                  >
+                    <option value="all">All Roles</option>
+                    <option value="parent">Parents</option>
+                    <option value="professional">Professionals</option>
+                  </Form.Select>
+                  
+                  <Form.Select 
+                    value={verificationFilter} 
+                    onChange={(e) => setVerificationFilter(e.target.value)}
+                    style={{ width: '180px' }}
+                  >
+                    <option value="all">All Verification</option>
+                    <option value="verified">Verified</option>
+                    <option value="pending">Pending</option>
+                    <option value="unverified">Unverified</option>
+                  </Form.Select>
                 </div>
                 
                 <div className="text-muted">
-                  Total: {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'}
+                  Total: {filteredUsers.length} users
                 </div>
               </div>
               
-              {loading ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="text-center py-5">
-                  <p className="text-muted">No users found</p>
-                </div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead>
+              <div className="table-container">
+                <Table hover className="mb-0">
+                  <thead>
+                    <tr>
+                      <th>NAME/EMAIL</th>
+                      <th>ROLE</th>
+                      <th>PROFESSION/AFFILIATION</th>
+                      <th>VERIFICATION</th>
+                      <th>CREATED ↓</th>
+                      <th>ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.length === 0 ? (
                       <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Child</th>
-                        <th>Status</th>
-                        <th>
-                          Created
-                          <i className="bi bi-arrow-down-short ms-1" title="Sorted newest first"></i>
-                        </th>
-                        <th>Actions</th>
+                        <td colSpan="6" className="text-center py-5">
+                          <div>
+                            <i className="bi bi-people display-4 text-muted mb-3"></i>
+                            <div className="text-muted">
+                              {searchTerm || roleFilter !== 'all' || verificationFilter !== 'all'
+                                ? 'No users match your filters'
+                                : 'No users found'
+                              }
+                            </div>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {filteredUsers.map(user => (
+                    ) : (
+                      filteredUsers.map((user) => (
                         <tr key={user.id}>
                           <td>
                             <div className="d-flex align-items-center">
-                              {getProfilePicture(user) && getProfilePicture(user) !== '' ? (
+                              {user.profile_image_url ? (
                                 <img 
-                                  src={getProfilePicture(user)} 
-                                  alt={user.name || 'User'} 
-                                  className="rounded-circle me-2"
-                                  width="32"
-                                  height="32"
-                                  onError={(e) => {
-                                    e.target.onerror = null; 
-                                    e.target.src = 'https://via.placeholder.com/32';
-                                  }}
+                                  src={user.profile_image_url} 
+                                  alt={user.name} 
+                                  className="rounded-circle me-3"
+                                  width="40"
+                                  height="40"
+                                  style={{ objectFit: 'cover' }}
                                 />
                               ) : (
                                 <div 
-                                  className="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center me-2"
-                                  style={{ width: '32px', height: '32px' }}
+                                  className="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center me-3"
+                                  style={{ width: '40px', height: '40px' }}
                                 >
                                   <i className="bi bi-person text-secondary"></i>
                                 </div>
                               )}
-                              <Link to={`/users/${user.id}`} className="text-decoration-none">
-                                {getUserDisplayName(user)}
-                              </Link>
+                              <div>
+                                <div className="fw-semibold">{user.name || 'Anonymous'}</div>
+                                <small className="text-muted">{user.email}</small>
+                              </div>
                             </div>
                           </td>
-                          <td>{user.email}</td>
-                          <td>{getUserTypeText(user)}</td>
                           <td>
-                            {user.role === 'parent' && user.childName ? 
+                            <Badge bg={user.role === 'professional' ? 'info' : 'primary'}>
+                              {user.role?.charAt(0).toUpperCase() + user.role?.slice(1)}
+                            </Badge>
+                          </td>
+                          <td>
+                            {user.role === 'professional' ? (
                               <div>
-                                {user.childName}{user.childAge ? `, ${user.childAge} years` : ''}
-                                {user.notes && <div className="small text-muted text-truncate" style={{maxWidth: "150px"}}>{user.notes}</div>}
-                              </div> 
-                              : '-'}
+                                <div className="fw-medium">{user.profession || 'N/A'}</div>
+                                <small className="text-muted">{user.affiliation || 'N.U Dasma'}</small>
+                              </div>
+                            ) : (
+                              <span className="text-muted">-</span>
+                            )}
+                          </td>
+                          <td>{getVerificationBadge(user)}</td>
+                          <td>
+                            <small className="text-muted">
+                              {formatDate(user.created_at || user.createdAt)}
+                            </small>
                           </td>
                           <td>
-                            <span className={`badge ${getStatusBadgeClass(user.status)}`}>
-                              {user.status || 'active'}
-                            </span>
-                          </td>
-                          <td>
-                            {formatDate(user.createdAt)}
-                          </td>
-                          <td>
-                            <div className="d-flex">
-                              <Link 
-                                to={`/users/${user.id}`}
-                                className="btn btn-sm btn-outline-secondary me-2"
-                              >
-                                <i className="bi bi-eye"></i>
+                            <div className="d-flex gap-1">
+                              <Link to={`/users/${user.id}`}>
+                                <Button variant="outline-primary" size="sm">
+                                  <i className="bi bi-eye"></i>
+                                </Button>
                               </Link>
-                              <Link 
-                                to={`/users/${user.id}/edit`}
-                                className="btn btn-sm btn-outline-primary me-2"
-                              >
-                                <i className="bi bi-pencil"></i>
+                              <Link to={`/users/${user.id}/edit`}>
+                                <Button variant="outline-secondary" size="sm">
+                                  <i className="bi bi-pencil"></i>
+                                </Button>
                               </Link>
-                              <Button 
-                                variant="outline-danger" 
+                              <Button
+                                variant="outline-danger"
                                 size="sm"
-                                onClick={() => handleDeleteClick(user)}
+                                onClick={() => handleDeleteUser(user.id)}
                               >
                                 <i className="bi bi-trash"></i>
                               </Button>
                             </div>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </div>
+
+              <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <small className="text-muted">
+                  Showing {filteredUsers.length} of {users.length} users
+                </small>
+                <div className="d-flex gap-3">
+                  <small className="text-muted">
+                    <Badge bg="primary" className="me-1">{users.filter(u => u.role === 'parent').length}</Badge>
+                    Parents
+                  </small>
+                  <small className="text-muted">
+                    <Badge bg="info" className="me-1">{users.filter(u => u.role === 'professional').length}</Badge>
+                    Professionals
+                  </small>
+                  <small className="text-muted">
+                    <Badge bg="success" className="me-1">{users.filter(u => u.isVerified || u.verificationStatus === 'verified').length}</Badge>
+                    Verified
+                  </small>
                 </div>
-              )}
+              </div>
             </Card.Body>
           </Card>
-          
-          <Modal show={showDeleteModal} onHide={handleDeleteCancel}>
-            <Modal.Header closeButton>
-              <Modal.Title>Confirm Delete</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              Are you sure you want to delete user <strong>{userToDelete?.name || userToDelete?.email}</strong>?
-              This action cannot be undone.
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleDeleteCancel}>
-                Cancel
-              </Button>
-              <Button variant="danger" onClick={handleDeleteConfirm}>
-                Delete
-              </Button>
-            </Modal.Footer>
-          </Modal>
         </Container>
       </div>
     </div>

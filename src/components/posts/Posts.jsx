@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Container, Card, Table, Button, Form, Modal, Alert, Badge } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
 import { getPosts, deletePost } from '../../firebase/services';
-import { Modal, Button, Alert } from 'react-bootstrap';
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
@@ -35,12 +35,10 @@ const Posts = () => {
   useEffect(() => {
     let results = [...posts];
     
-    // Apply category filter
     if (categoryFilter !== 'all') {
       results = results.filter(post => post.category === categoryFilter);
     }
     
-    // Apply search term
     if (searchTerm) {
       results = results.filter(post => 
         post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,10 +52,6 @@ const Posts = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-  };
-
-  const handleCategoryChange = (e) => {
-    setCategoryFilter(e.target.value);
   };
 
   const handleDeleteClick = (post) => {
@@ -80,7 +74,6 @@ const Posts = () => {
       await deletePost(postToDelete.id);
       console.log("Post successfully deleted:", postToDelete.id);
       
-      // Update local state after successful deletion
       const updatedPosts = posts.filter(post => post.id !== postToDelete.id);
       setPosts(updatedPosts);
       setFilteredPosts(updatedPosts);
@@ -98,14 +91,6 @@ const Posts = () => {
     setPostToDelete(null);
   };
 
-  const getCategories = () => {
-    const categories = new Set();
-    posts.forEach(post => {
-      if (post.category) categories.add(post.category);
-    });
-    return Array.from(categories);
-  };
-
   const truncateContent = (content, maxLength = 50) => {
     if (!content) return '';
     return content.length > maxLength 
@@ -117,90 +102,121 @@ const Posts = () => {
     <div className="admin-container">
       <Sidebar />
       <div className="main-content">
-        <div className="data-table-container">
-          <div className="data-table-header">
-            <h2>Posts Management</h2>
-            <div className="d-flex">
-              <div className="search-bar">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search posts..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </div>
-            </div>
+        <Container fluid className="py-3">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+              <i className="bi bi-file-post me-2"></i>
+              Posts Management
+            </h1>
           </div>
-          
-          {loading ? (
-            <div className="text-center my-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Title/Content</th>
-                    <th>Author</th>
-                    <th>Category</th>
-                    <th>Likes</th>
-                    <th>Comments</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPosts.map(post => (
-                    <tr key={post.id}>
-                      <td>{post.id}</td>
-                      <td>
-                        {post.title ? post.title : truncateContent(post.content)}
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          {post.authorPhotoUrl ? (
-                            <img 
-                              src={post.authorPhotoUrl} 
-                              alt={post.authorName} 
-                              className="rounded-circle me-2"
-                              width="25"
-                              height="25"
-                            />
-                          ) : null}
-                          {post.authorName}
-                          {post.isProfessionalPost && (
-                            <span className="badge bg-info ms-1">Pro</span>
-                          )}
-                        </div>
-                      </td>
-                      <td>{post.category || 'Uncategorized'}</td>
-                      <td>{post.likeCount}</td>
-                      <td>{post.commentCount}</td>
-                      <td>{new Date(post.createdAt).toLocaleString()}</td>
-                      <td>
-                        <div className="btn-group">
-                          <Link to={`/posts/${post.id}`} className="btn btn-sm btn-info">
-                            <i className="bi bi-eye"></i>
-                          </Link>
-                          <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() => handleDeleteClick(post)}
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+
+          {error && (
+            <Alert variant="danger" onClose={() => setError(null)} dismissible>
+              {error}
+            </Alert>
           )}
+          
+          <Card className="border-0 shadow-sm">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div className="d-flex align-items-center gap-2 mb-2 mb-md-0">
+                  <Form.Control
+                    type="text"
+                    placeholder="Search posts..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    style={{ width: '250px' }}
+                  />
+                </div>
+                
+                <div className="text-muted">
+                  Total: {filteredPosts.length} posts
+                </div>
+              </div>
+              
+              {loading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <Table hover className="mb-0">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Title/Content</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Engagement</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPosts.map(post => (
+                        <tr key={post.id}>
+                          <td>{post.id}</td>
+                          <td>
+                            <div className="fw-medium">
+                              {post.title ? post.title : truncateContent(post.content)}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              {post.authorPhotoUrl ? (
+                                <img 
+                                  src={post.authorPhotoUrl} 
+                                  alt={post.authorName} 
+                                  className="rounded-circle me-2"
+                                  width="25"
+                                  height="25"
+                                />
+                              ) : null}
+                              <span>{post.authorName}</span>
+                              {post.isProfessionalPost && (
+                                <Badge bg="info" className="ms-1">Pro</Badge>
+                              )}
+                            </div>
+                          </td>
+                          <td>{post.category || 'Uncategorized'}</td>
+                          <td>
+                            <small className="text-muted">
+                              <i className="bi bi-heart me-1"></i>{post.likeCount || 0}
+                              <span className="mx-2">•</span>
+                              <i className="bi bi-chat me-1"></i>{post.commentCount || 0}
+                            </small>
+                          </td>
+                          <td>
+                            <small className="text-muted">
+                              {new Date(post.createdAt).toLocaleDateString()}
+                            </small>
+                          </td>
+                          <td>
+                            <div className="d-flex gap-1">
+                              <Link to={`/posts/${post.id}`}>
+                                <Button variant="outline-primary" size="sm">
+                                  <i className="bi bi-eye"></i>
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => handleDeleteClick(post)}
+                              >
+                                <i className="bi bi-trash"></i>
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
           
           {/* Delete confirmation modal */}
           <Modal 
@@ -229,14 +245,7 @@ const Posts = () => {
               </Button>
             </Modal.Footer>
           </Modal>
-
-          {/* Error alert */}
-          {error && (
-            <Alert variant="danger" onClose={() => setError(null)} dismissible>
-              {error}
-            </Alert>
-          )}
-        </div>
+        </Container>
       </div>
     </div>
   );

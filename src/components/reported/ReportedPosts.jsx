@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../Sidebar';
 import { getReportedPosts, resolveReport, deletePost } from '../../firebase/services';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Container } from 'react-bootstrap';
 
 const ReportedPosts = () => {
   // Add this console log at the beginning of your component
@@ -168,164 +168,172 @@ const ReportedPosts = () => {
   return (
     <div className="admin-container">
       <Sidebar />
-      <div className="main-content">
-        <div className="data-table-container">
-          <div className="data-table-header">
-            <h2>Reported Posts</h2>
-            <div className="d-flex">
-              <div className="me-2">
-                <select 
-                  className="form-select" 
-                  value={reasonFilter}
-                  onChange={handleReasonChange}
-                >
-                  <option value="all">All Reasons</option>
-                  {getReasons().map(reason => (
-                    <option key={reason} value={reason}>{reason}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="me-2">
-                <select 
-                  className="form-select" 
-                  value={statusFilter}
-                  onChange={handleStatusChange}
-                >
-                  <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="rejected">Dismissed</option>
-                  <option value="deleted">Removed</option>
-                </select>
-              </div>
-              <div className="search-bar">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search reports..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </div>
-            </div>
+      <div className={`main-content`}>
+        <Container fluid className="py-3">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+              <i className="bi bi-flag me-2"></i>
+              Reported Posts
+            </h1>
           </div>
-          
-          {loading ? (
-            <div className="text-center my-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
+          <div className="data-table-container">
+            <div className="data-table-header">
+              <h2>Reported Posts</h2>
+              <div className="d-flex">
+                <div className="me-2">
+                  <select 
+                    className="form-select" 
+                    value={reasonFilter}
+                    onChange={handleReasonChange}
+                  >
+                    <option value="all">All Reasons</option>
+                    {getReasons().map(reason => (
+                      <option key={reason} value={reason}>{reason}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="me-2">
+                  <select 
+                    className="form-select" 
+                    value={statusFilter}
+                    onChange={handleStatusChange}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Dismissed</option>
+                    <option value="deleted">Removed</option>
+                  </select>
+                </div>
+                <div className="search-bar">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search reports..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                  />
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Reported Content</th>
-                    <th>Author</th>
-                    <th>Reported By</th>
-                    <th>Reason</th>
-                    <th>Status</th> {/* New column */}
-                    <th>Reported At</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredReports.map(report => (
-                    <tr key={report.id} className={report.status !== 'pending' ? 'table-secondary' : ''}>
-                      <td>{report.id}</td>
-                      <td>
-                        {report.post?.content 
-                          ? (report.post.content.length > 50
-                            ? report.post.content.substring(0, 50) + '...'
-                            : report.post.content)
-                          : 'Content not available'}
-                      </td>
-                      <td>{report.post?.authorName || 'Unknown'}</td>
-                      <td>{report.reportedBy}</td>
-                      <td>
-                        <span className="badge bg-warning">{report.reason}</span>
-                      </td>
-                      <td>
-                        {report.status === 'pending' && <span className="badge bg-warning">Pending</span>}
-                        {report.status === 'rejected' && <span className="badge bg-secondary">Dismissed</span>}
-                        {report.status === 'deleted' && <span className="badge bg-danger">Removed</span>}
-                      </td>
-                      <td>{new Date(report.reportedAt).toLocaleString()}</td>
-                      <td>
-                        <div className="btn-group">
-                          <Link to={`/reported-posts/${report.id}`} className="btn btn-sm btn-info">
-                            <i className="bi bi-eye"></i>
-                          </Link>
-                          {report.status === 'pending' && (
-                            <>
-                              <button
-                                className="btn btn-sm btn-secondary"
-                                onClick={() => handleActionClick(report, 'dismiss')}
-                                title="Dismiss Report"
-                              >
-                                <i className="bi bi-check-lg"></i>
-                              </button>
-                              <button
-                                className="btn btn-sm btn-danger"
-                                onClick={() => handleActionClick(report, 'remove')}
-                                title="Remove Post"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
+            
+            {loading ? (
+              <div className="text-center my-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Reported Content</th>
+                      <th>Author</th>
+                      <th>Reported By</th>
+                      <th>Reason</th>
+                      <th>Status</th> {/* New column */}
+                      <th>Reported At</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          
-          {/* Confirmation modal */}
-          <Modal 
-            show={showConfirmAction} 
-            onHide={cancelAction}
-            style={{ zIndex: 1060 }}
-            backdrop="static" // This forces the user to interact with the modal
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>
-                {actionType === 'dismiss' ? 'Dismiss Report' : 'Remove Post'}
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              {actionType === 'dismiss' ? (
-                <p>Are you sure you want to dismiss this report?</p>
-              ) : (
-                <>
-                  <p>Are you sure you want to remove this post?</p>
-                  <p className="text-danger">This will permanently delete the post from the system.</p>
-                </>
-              )}
-              <div className="alert alert-secondary">
-                {selectedReport?.post?.content 
-                  ? (selectedReport.post.content.length > 100
-                    ? selectedReport.post.content.substring(0, 100) + '...'
-                    : selectedReport.post.content)
-                  : 'Content not available'}
+                  </thead>
+                  <tbody>
+                    {filteredReports.map(report => (
+                      <tr key={report.id} className={report.status !== 'pending' ? 'table-secondary' : ''}>
+                        <td>{report.id}</td>
+                        <td>
+                          {report.post?.content 
+                            ? (report.post.content.length > 50
+                              ? report.post.content.substring(0, 50) + '...'
+                              : report.post.content)
+                            : 'Content not available'}
+                        </td>
+                        <td>{report.post?.authorName || 'Unknown'}</td>
+                        <td>{report.reportedBy}</td>
+                        <td>
+                          <span className="badge bg-warning">{report.reason}</span>
+                        </td>
+                        <td>
+                          {report.status === 'pending' && <span className="badge bg-warning">Pending</span>}
+                          {report.status === 'rejected' && <span className="badge bg-secondary">Dismissed</span>}
+                          {report.status === 'deleted' && <span className="badge bg-danger">Removed</span>}
+                        </td>
+                        <td>{new Date(report.reportedAt).toLocaleString()}</td>
+                        <td>
+                          <div className="btn-group">
+                            <Link to={`/reported-posts/${report.id}`} className="btn btn-sm btn-info">
+                              <i className="bi bi-eye"></i>
+                            </Link>
+                            {report.status === 'pending' && (
+                              <>
+                                <button
+                                  className="btn btn-sm btn-secondary"
+                                  onClick={() => handleActionClick(report, 'dismiss')}
+                                  title="Dismiss Report"
+                                >
+                                  <i className="bi bi-check-lg"></i>
+                                </button>
+                                <button
+                                  className="btn btn-sm btn-danger"
+                                  onClick={() => handleActionClick(report, 'remove')}
+                                  title="Remove Post"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={cancelAction}>
-                Cancel
-              </Button>
-              <Button 
-                variant={actionType === 'dismiss' ? 'primary' : 'danger'} 
-                onClick={confirmAction}
-              >
-                {actionType === 'dismiss' ? 'Dismiss' : 'Remove'}
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        </div>
+            )}
+            
+            {/* Confirmation modal */}
+            <Modal 
+              show={showConfirmAction} 
+              onHide={cancelAction}
+              style={{ zIndex: 1060 }}
+              backdrop="static" // This forces the user to interact with the modal
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>
+                  {actionType === 'dismiss' ? 'Dismiss Report' : 'Remove Post'}
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                {actionType === 'dismiss' ? (
+                  <p>Are you sure you want to dismiss this report?</p>
+                ) : (
+                  <>
+                    <p>Are you sure you want to remove this post?</p>
+                    <p className="text-danger">This will permanently delete the post from the system.</p>
+                  </>
+                )}
+                <div className="alert alert-secondary">
+                  {selectedReport?.post?.content 
+                    ? (selectedReport.post.content.length > 100
+                      ? selectedReport.post.content.substring(0, 100) + '...'
+                      : selectedReport.post.content)
+                    : 'Content not available'}
+                </div>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={cancelAction}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant={actionType === 'dismiss' ? 'primary' : 'danger'} 
+                  onClick={confirmAction}
+                >
+                  {actionType === 'dismiss' ? 'Dismiss' : 'Remove'}
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          </div>
+        </Container>
       </div>
     </div>
   );
