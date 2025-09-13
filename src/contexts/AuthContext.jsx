@@ -1,14 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-
-const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+import { useState, useEffect } from 'react';
+import { AuthContext } from './AuthContextDefinition';
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -18,12 +9,12 @@ export const AuthProvider = ({ children }) => {
     // Check if user is already logged in
     const authCode = localStorage.getItem('adminAuthCode');
     const authTime = localStorage.getItem('adminAuthTime');
-    
+
     if (authCode && authTime) {
       const loginTime = parseInt(authTime);
       const currentTime = Date.now();
       const timeDifference = currentTime - loginTime;
-      
+
       // Session expires after 24 hours (86400000 ms)
       if (timeDifference < 86400000) {
         setIsAuthenticated(true);
@@ -33,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('adminAuthTime');
       }
     }
-    
+
     setLoading(false);
   }, []);
 

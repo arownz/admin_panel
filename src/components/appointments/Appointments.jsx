@@ -26,27 +26,27 @@ const Appointments = () => {
         setLoading(false);
       }
     };
-    
+
     fetchAppointments();
   }, []);
 
   useEffect(() => {
     let results = [...appointments];
-    
+
     // Apply status filter
     if (statusFilter !== 'all') {
       results = results.filter(appointment => appointment.status === statusFilter);
     }
-    
+
     // Apply search term
     if (searchTerm) {
-      results = results.filter(appointment => 
+      results = results.filter(appointment =>
         appointment.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.professionalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.specialty?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     setFilteredAppointments(results);
   }, [searchTerm, statusFilter, appointments]);
 
@@ -59,7 +59,7 @@ const Appointments = () => {
   };
 
   const getStatusBadgeClass = (status) => {
-    switch(status) {
+    switch (status) {
       case 'completed':
         return 'bg-success';
       case 'cancelled':
@@ -78,18 +78,16 @@ const Appointments = () => {
       <Sidebar />
       <div className="main-content">
         <Container fluid className="py-3">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-              <i className="bi bi-calendar-check me-2"></i>
-              Appointments
-            </h1>
+          <div className="d-flex align-items-center mb-4">
+            <i className="bi bi-calendar-check fs-2 text-primary me-2"></i>
+            <h1 className="mb-0">Appointments</h1>
           </div>
           <div className="data-table-container">
             <div className="data-table-header">
               <div className="d-flex">
                 <div className="me-2">
-                  <select 
-                    className="form-select" 
+                  <select
+                    className="form-select"
                     value={statusFilter}
                     onChange={handleStatusChange}
                   >
@@ -111,7 +109,7 @@ const Appointments = () => {
                 </div>
               </div>
             </div>
-            
+
             {loading ? (
               <div className="text-center my-5">
                 <div className="spinner-border text-primary" role="status">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Card, Button, Badge, Row, Col, Spinner, Alert, Table } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
@@ -11,11 +11,7 @@ const UserDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchUser();
-  }, [id]);
-
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       setLoading(true);
       const userData = await getUserById(id);
@@ -27,11 +23,15 @@ const UserDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
-    
+
     try {
       let date;
       if (typeof timestamp.toDate === 'function') {
@@ -41,9 +41,9 @@ const UserDetail = () => {
       } else {
         date = new Date(timestamp);
       }
-      
+
       if (isNaN(date.getTime())) return 'Invalid date';
-      
+
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -51,7 +51,7 @@ const UserDetail = () => {
         hour: '2-digit',
         minute: '2-digit'
       });
-    } catch (error) {
+    } catch {
       return 'Invalid date';
     }
   };
@@ -113,8 +113,8 @@ const UserDetail = () => {
           {/* Header */}
           <div className="d-flex justify-content-between align-items-start mb-4">
             <div>
-              <Button 
-                variant="outline-secondary" 
+              <Button
+                variant="outline-secondary"
                 onClick={() => navigate('/users')}
                 className="mb-3"
               >
@@ -136,14 +136,14 @@ const UserDetail = () => {
             <Card.Body className="p-5">
               <div className="text-center mb-5">
                 {user.profile_image_url ? (
-                  <img 
-                    src={user.profile_image_url} 
-                    alt={user.name} 
+                  <img
+                    src={user.profile_image_url}
+                    alt={user.name}
                     className="rounded-circle mb-4"
                     style={{ width: '120px', height: '120px', objectFit: 'cover' }}
                   />
                 ) : (
-                  <div 
+                  <div
                     className="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-4"
                     style={{ width: '120px', height: '120px' }}
                   >

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Card, Table, Button, Form, Badge, Spinner, Alert } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
-import { useSidebar } from '../../contexts/SidebarContext';
-import { getUsersRealtime, updateUserStatus, deleteUser } from '../../firebase/services';
+import { useSidebar } from '../../hooks/useSidebar';
+import { getUsersRealtime, deleteUser } from '../../firebase/services';
 
 const Users = () => {
   const { isCollapsed } = useSidebar();
@@ -58,7 +58,7 @@ const Users = () => {
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
-    
+
     try {
       let date;
       if (typeof timestamp.toDate === 'function') {
@@ -68,9 +68,9 @@ const Users = () => {
       } else {
         date = new Date(timestamp);
       }
-      
+
       if (isNaN(date.getTime())) return 'Invalid date';
-      
+
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -78,7 +78,7 @@ const Users = () => {
         hour: '2-digit',
         minute: '2-digit'
       });
-    } catch (error) {
+    } catch {
       return 'Invalid date';
     }
   };
@@ -108,16 +108,6 @@ const Users = () => {
     }
   };
 
-  const handleStatusChange = async (userId, newStatus) => {
-    try {
-      await updateUserStatus(userId, newStatus);
-      setError(null);
-    } catch (err) {
-      console.error('Error updating user status:', err);
-      setError('Failed to update user status');
-    }
-  };
-
   if (loading) {
     return (
       <div className="admin-container">
@@ -139,11 +129,9 @@ const Users = () => {
       <Sidebar />
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-              <i className="bi bi-people me-2"></i>
-              User Management
-            </h1>
+          <div className="d-flex align-items-center mb-4">
+            <i className="bi bi-people fs-2 text-primary me-2"></i>
+            <h1 className="mb-0">User Management</h1>
           </div>
 
           {error && (
@@ -151,7 +139,7 @@ const Users = () => {
               {error}
             </Alert>
           )}
-          
+
           <Card className="border-0 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
@@ -163,9 +151,9 @@ const Users = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{ width: '250px' }}
                   />
-                  
-                  <Form.Select 
-                    value={roleFilter} 
+
+                  <Form.Select
+                    value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
                     style={{ width: '150px' }}
                   >
@@ -173,9 +161,9 @@ const Users = () => {
                     <option value="parent">Parents</option>
                     <option value="professional">Professionals</option>
                   </Form.Select>
-                  
-                  <Form.Select 
-                    value={verificationFilter} 
+
+                  <Form.Select
+                    value={verificationFilter}
                     onChange={(e) => setVerificationFilter(e.target.value)}
                     style={{ width: '180px' }}
                   >
@@ -185,12 +173,12 @@ const Users = () => {
                     <option value="unverified">Unverified</option>
                   </Form.Select>
                 </div>
-                
+
                 <div className="text-muted">
                   Total: {filteredUsers.length} users
                 </div>
               </div>
-              
+
               <div className="table-container">
                 <Table hover className="mb-0">
                   <thead>
@@ -224,16 +212,16 @@ const Users = () => {
                           <td>
                             <div className="d-flex align-items-center">
                               {user.profile_image_url ? (
-                                <img 
-                                  src={user.profile_image_url} 
-                                  alt={user.name} 
+                                <img
+                                  src={user.profile_image_url}
+                                  alt={user.name}
                                   className="rounded-circle me-3"
                                   width="40"
                                   height="40"
                                   style={{ objectFit: 'cover' }}
                                 />
                               ) : (
-                                <div 
+                                <div
                                   className="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center me-3"
                                   style={{ width: '40px', height: '40px' }}
                                 >

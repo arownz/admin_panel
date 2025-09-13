@@ -19,6 +19,29 @@ const VerificationRequests = () => {
   }, []);
 
   useEffect(() => {
+    const filterRequests = () => {
+      let filtered = [...requests];
+
+      if (searchTerm) {
+        filtered = filtered.filter(request =>
+          request.workEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          request.profession?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          request.affiliation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          request.userId?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+
+      if (statusFilter !== 'all') {
+        filtered = filtered.filter(request => request.status === statusFilter);
+      }
+
+      if (professionFilter !== 'all') {
+        filtered = filtered.filter(request => request.profession === professionFilter);
+      }
+
+      setFilteredRequests(filtered);
+    };
+
     filterRequests();
   }, [requests, searchTerm, statusFilter, professionFilter]);
 
@@ -36,41 +59,18 @@ const VerificationRequests = () => {
     }
   };
 
-  const filterRequests = () => {
-    let filtered = [...requests];
-
-    if (searchTerm) {
-      filtered = filtered.filter(request =>
-        request.workEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.profession?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.affiliation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.userId?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(request => request.status === statusFilter);
-    }
-
-    if (professionFilter !== 'all') {
-      filtered = filtered.filter(request => request.profession === professionFilter);
-    }
-
-    setFilteredRequests(filtered);
-  };
-
   const handleStatusUpdate = async (requestId, newStatus) => {
     try {
       setProcessing(prev => ({ ...prev, [requestId]: true }));
-      
+
       await updateVerificationStatus(requestId, newStatus);
-      
-      setRequests(prev => prev.map(request => 
-        request.id === requestId 
+
+      setRequests(prev => prev.map(request =>
+        request.id === requestId
           ? { ...request, status: newStatus, processedAt: new Date() }
           : request
       ));
-      
+
       setError('');
     } catch (err) {
       console.error('Error updating verification status:', err);
@@ -125,11 +125,9 @@ const VerificationRequests = () => {
       <Sidebar />
       <div className="main-content">
         <Container fluid className="py-3">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-              <i className="bi bi-patch-check me-2"></i>
-              Verification Requests
-            </h1>
+          <div className="d-flex align-items-center mb-4">
+            <i className="bi bi-patch-check fs-2 text-primary me-2"></i>
+            <h1 className="mb-0">Verification Requests</h1>
           </div>
 
           {error && (
@@ -154,7 +152,7 @@ const VerificationRequests = () => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </InputGroup>
-                  
+
                   <Form.Select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -177,7 +175,7 @@ const VerificationRequests = () => {
                     ))}
                   </Form.Select>
                 </div>
-                
+
                 <div className="text-muted">
                   Total: {filteredRequests.length} requests
                 </div>
@@ -230,7 +228,7 @@ const VerificationRequests = () => {
                           <td>{getStatusBadge(request.status)}</td>
                           <td>
                             <small className="text-muted">
-                              {request.submittedAt ? 
+                              {request.submittedAt ?
                                 new Date(request.submittedAt).toLocaleDateString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
@@ -248,7 +246,7 @@ const VerificationRequests = () => {
                                   <i className="bi bi-eye"></i>
                                 </Button>
                               </Link>
-                              
+
                               {request.status === 'pending' && (
                                 <>
                                   <Button

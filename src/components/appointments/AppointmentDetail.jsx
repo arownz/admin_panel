@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Container, Card, Row, Col, Button, Alert, Badge } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
 import { getAppointment } from '../../firebase/services';
 
 const AppointmentDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,11 +14,11 @@ const AppointmentDetail = () => {
     const fetchAppointmentData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch appointment details
         const appointmentData = await getAppointment(id);
         setAppointment(appointmentData);
-        
+
       } catch (err) {
         console.error("Error fetching appointment data:", err);
         setError("Failed to load appointment details. Please try again.");
@@ -27,12 +26,12 @@ const AppointmentDetail = () => {
         setLoading(false);
       }
     };
-    
+
     fetchAppointmentData();
   }, [id]);
 
   const getStatusBadgeClass = (status) => {
-    switch(status) {
+    switch (status) {
       case 'completed':
         return 'success';
       case 'cancelled':
@@ -104,7 +103,7 @@ const AppointmentDetail = () => {
               </Link>
             </div>
           </div>
-          
+
           <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="bg-white border-0 pt-4 pb-0">
               <h5 className="mb-0">Appointment Information</h5>
@@ -125,16 +124,16 @@ const AppointmentDetail = () => {
               <Row className="mb-3">
                 <Col sm={4} className="text-muted">Date & Time:</Col>
                 <Col sm={8}>
-                  {appointment.appointmentTime ? 
-                    new Date(appointment.appointmentTime).toLocaleString() : 
+                  {appointment.appointmentTime ?
+                    new Date(appointment.appointmentTime).toLocaleString() :
                     'Not scheduled'}
                 </Col>
               </Row>
               <Row className="mb-3">
                 <Col sm={4} className="text-muted">Created At:</Col>
                 <Col sm={8}>
-                  {appointment.createdAt ? 
-                    new Date(appointment.createdAt).toLocaleString() : 
+                  {appointment.createdAt ?
+                    new Date(appointment.createdAt).toLocaleString() :
                     'Unknown'}
                 </Col>
               </Row>
@@ -163,7 +162,7 @@ const AppointmentDetail = () => {
                 </Card.Body>
               </Card>
             </Col>
-            
+
             <Col md={6}>
               <Card className="border-0 shadow-sm mb-4">
                 <Card.Header className="bg-white border-0 pt-4 pb-0">

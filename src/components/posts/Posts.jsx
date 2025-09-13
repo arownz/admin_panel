@@ -8,7 +8,6 @@ const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -28,29 +27,23 @@ const Posts = () => {
         setLoading(false);
       }
     };
-    
+
     fetchPosts();
   }, []);
 
   useEffect(() => {
     let results = [...posts];
-    
-    if (categoryFilter !== 'all') {
-      results = results.filter(post => post.category === categoryFilter);
-    }
-    
+
     if (searchTerm) {
-      results = results.filter(post => 
+      results = results.filter(post =>
         post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.authorName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
-    setFilteredPosts(results);
-  }, [searchTerm, categoryFilter, posts]);
 
-  const handleSearchChange = (e) => {
+    setFilteredPosts(results);
+  }, [searchTerm, posts]); const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
@@ -69,11 +62,11 @@ const Posts = () => {
     }
 
     console.log("Attempting to delete post:", postToDelete.id);
-    
+
     try {
       await deletePost(postToDelete.id);
       console.log("Post successfully deleted:", postToDelete.id);
-      
+
       const updatedPosts = posts.filter(post => post.id !== postToDelete.id);
       setPosts(updatedPosts);
       setFilteredPosts(updatedPosts);
@@ -93,8 +86,8 @@ const Posts = () => {
 
   const truncateContent = (content, maxLength = 50) => {
     if (!content) return '';
-    return content.length > maxLength 
-      ? content.substring(0, maxLength) + '...' 
+    return content.length > maxLength
+      ? content.substring(0, maxLength) + '...'
       : content;
   };
 
@@ -103,11 +96,9 @@ const Posts = () => {
       <Sidebar />
       <div className="main-content">
         <Container fluid className="py-3">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-              <i className="bi bi-file-post me-2"></i>
-              Posts Management
-            </h1>
+          <div className="d-flex align-items-center mb-4">
+            <i className="bi bi-file-post fs-2 text-primary me-2"></i>
+            <h1 className="mb-0">Posts Management</h1>
           </div>
 
           {error && (
@@ -115,7 +106,7 @@ const Posts = () => {
               {error}
             </Alert>
           )}
-          
+
           <Card className="border-0 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
@@ -128,12 +119,12 @@ const Posts = () => {
                     style={{ width: '250px' }}
                   />
                 </div>
-                
+
                 <div className="text-muted">
                   Total: {filteredPosts.length} posts
                 </div>
               </div>
-              
+
               {loading ? (
                 <div className="text-center py-5">
                   <div className="spinner-border text-primary" role="status">
@@ -166,9 +157,9 @@ const Posts = () => {
                           <td>
                             <div className="d-flex align-items-center">
                               {post.authorPhotoUrl ? (
-                                <img 
-                                  src={post.authorPhotoUrl} 
-                                  alt={post.authorName} 
+                                <img
+                                  src={post.authorPhotoUrl}
+                                  alt={post.authorName}
                                   className="rounded-circle me-2"
                                   width="25"
                                   height="25"
@@ -217,10 +208,10 @@ const Posts = () => {
               )}
             </Card.Body>
           </Card>
-          
+
           {/* Delete confirmation modal */}
-          <Modal 
-            show={showConfirmDelete} 
+          <Modal
+            show={showConfirmDelete}
             onHide={cancelDelete}
             backdrop="static"
             keyboard={false}

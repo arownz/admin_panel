@@ -15,10 +15,10 @@ import {
   LineElement
 } from 'chart.js';
 import Sidebar from './Sidebar';
-import { 
-  getUsers, 
-  getAppointments, 
-  getPosts, 
+import {
+  getUsers,
+  getAppointments,
+  getPosts,
   getReportedPosts,
   getVerificationRequests,
   convertTimestamp
@@ -50,7 +50,7 @@ const Dashboard = () => {
     newUsersThisMonth: 0,
     pendingVerifications: 0
   });
-  
+
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentAppointments, setRecentAppointments] = useState([]);
   const [recentPosts, setRecentPosts] = useState([]);
@@ -61,7 +61,7 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch all data
         const [usersData, appointmentsData, postsData, reportedPostsData, verificationData] = await Promise.all([
           getUsers(),
@@ -70,26 +70,26 @@ const Dashboard = () => {
           getReportedPosts(),
           getVerificationRequests()
         ]);
-        
+
         // Calculate enhanced statistics
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        
+
         // User statistics
         const newUsersThisMonth = usersData.filter(user => {
           const userDate = user.createdAt ? new Date(convertTimestamp(user.createdAt)) : new Date(0);
           return userDate >= startOfMonth;
         }).length;
-        
+
         // Appointment statistics
         const completedAppointments = appointmentsData.filter(apt => apt.status === 'completed').length;
-        
+
         // Report statistics
         const pendingReports = reportedPostsData.filter(report => report.status === 'pending').length;
-        
+
         // Verification statistics
         const pendingVerifications = verificationData.filter(req => req.status === 'pending').length;
-        
+
         setStats({
           users: usersData.length,
           appointments: appointmentsData.length,
@@ -101,7 +101,7 @@ const Dashboard = () => {
           newUsersThisMonth,
           pendingVerifications
         });
-        
+
         // Set recent data (last 5 items)
         const sortedUsers = [...usersData]
           .sort((a, b) => {
@@ -111,7 +111,7 @@ const Dashboard = () => {
           })
           .slice(0, 5);
         setRecentUsers(sortedUsers);
-        
+
         const sortedAppointments = [...appointmentsData]
           .sort((a, b) => {
             const dateA = a.appointmentTime ? new Date(convertTimestamp(a.appointmentTime)) : new Date(0);
@@ -120,7 +120,7 @@ const Dashboard = () => {
           })
           .slice(0, 5);
         setRecentAppointments(sortedAppointments);
-        
+
         const sortedPosts = [...postsData]
           .sort((a, b) => {
             const dateA = a.createdAt ? new Date(convertTimestamp(a.createdAt)) : new Date(0);
@@ -129,7 +129,7 @@ const Dashboard = () => {
           })
           .slice(0, 5);
         setRecentPosts(sortedPosts);
-        
+
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
         setError("Failed to load dashboard data. Please refresh the page.");
@@ -190,24 +190,24 @@ const Dashboard = () => {
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
-    
+
     try {
       if (typeof timestamp.toDate === 'function') {
         return timestamp.toDate().toLocaleString();
       }
-      
+
       if (timestamp.seconds) {
         return new Date(timestamp.seconds * 1000).toLocaleString();
       }
-      
+
       return new Date(timestamp).toLocaleString();
-    } catch (error) {
+    } catch {
       return 'Invalid date';
     }
   };
 
   const getStatusBadgeClass = (status) => {
-    switch(status) {
+    switch (status) {
       case 'completed': return 'bg-success';
       case 'cancelled': return 'bg-danger';
       case 'scheduled': return 'bg-primary';
@@ -254,8 +254,11 @@ const Dashboard = () => {
       <Sidebar />
       <div className="main-content">
         <Container fluid className="py-3">
-          <h1 className="mb-4">Dashboard Overview</h1>
-          
+          <div className="d-flex align-items-center mb-4">
+            <i className="bi bi-speedometer2 fs-2 text-primary me-2"></i>
+            <h1 className="mb-0">Dashboard Overview</h1>
+          </div>
+
           {/* Enhanced Stats Cards */}
           <Row className="g-3 mb-4">
             <Col md={6} xl={3}>
@@ -274,7 +277,7 @@ const Dashboard = () => {
                 </Card.Body>
               </Card>
             </Col>
-            
+
             <Col md={6} xl={3}>
               <Card className="stat-card h-100 border-0 shadow-sm">
                 <Card.Body className="d-flex align-items-center">
@@ -291,7 +294,7 @@ const Dashboard = () => {
                 </Card.Body>
               </Card>
             </Col>
-            
+
             <Col md={6} xl={3}>
               <Card className="stat-card h-100 border-0 shadow-sm">
                 <Card.Body className="d-flex align-items-center">
@@ -308,7 +311,7 @@ const Dashboard = () => {
                 </Card.Body>
               </Card>
             </Col>
-            
+
             <Col md={6} xl={3}>
               <Card className="stat-card h-100 border-0 shadow-sm">
                 <Card.Body className="d-flex align-items-center">
@@ -350,7 +353,7 @@ const Dashboard = () => {
               </Card>
             </Col>
           </Row>
-          
+
           {/* Charts */}
           <Row className="mb-4">
             <Col lg={8}>
@@ -360,23 +363,23 @@ const Dashboard = () => {
                 </Card.Header>
                 <Card.Body>
                   <div style={{ height: '300px' }}>
-                    <Bar 
-                      data={barChartData} 
-                      options={{ 
-                        responsive: true, 
+                    <Bar
+                      data={barChartData}
+                      options={{
+                        responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
                           legend: {
                             display: false
                           }
                         }
-                      }} 
+                      }}
                     />
                   </div>
                 </Card.Body>
               </Card>
             </Col>
-            
+
             <Col lg={4}>
               <Card className="border-0 shadow-sm h-100">
                 <Card.Header className="bg-white border-0 pt-4 pb-0">
@@ -384,19 +387,19 @@ const Dashboard = () => {
                 </Card.Header>
                 <Card.Body>
                   <div style={{ height: '300px' }}>
-                    <Pie 
-                      data={appointmentStatusData} 
-                      options={{ 
-                        responsive: true, 
-                        maintainAspectRatio: false 
-                      }} 
+                    <Pie
+                      data={appointmentStatusData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false
+                      }}
                     />
                   </div>
                 </Card.Body>
               </Card>
             </Col>
           </Row>
-          
+
           {/* Recent Data Tables */}
           <Row>
             <Col lg={6} className="mb-4">
@@ -446,7 +449,7 @@ const Dashboard = () => {
                 </Card.Body>
               </Card>
             </Col>
-            
+
             <Col lg={6} className="mb-4">
               <Card className="border-0 shadow-sm">
                 <Card.Header className="bg-white border-0 py-3">
@@ -476,8 +479,8 @@ const Dashboard = () => {
                             </td>
                             <td>{appointment.professionalName || 'N/A'}</td>
                             <td>
-                              {appointment.appointmentTime ? 
-                                formatDate(appointment.appointmentTime) : 
+                              {appointment.appointmentTime ?
+                                formatDate(appointment.appointmentTime) :
                                 'Not scheduled'
                               }
                             </td>
@@ -527,10 +530,10 @@ const Dashboard = () => {
                           <tr key={post.id}>
                             <td>
                               <Link to={`/posts/${post.id}`} className="text-decoration-none">
-                                {post.content ? 
-                                  (post.content.length > 50 ? 
-                                    post.content.substring(0, 50) + '...' : 
-                                    post.content) : 
+                                {post.content ?
+                                  (post.content.length > 50 ?
+                                    post.content.substring(0, 50) + '...' :
+                                    post.content) :
                                   'No content'
                                 }
                               </Link>
@@ -539,7 +542,7 @@ const Dashboard = () => {
                             <td>{formatDate(post.createdAt)}</td>
                             <td>
                               <small className="text-muted">
-                                <i className="bi bi-heart"></i> {post.likes || 0} | 
+                                <i className="bi bi-heart"></i> {post.likes || 0} |
                                 <i className="bi bi-chat"></i> {post.comments || 0}
                               </small>
                             </td>

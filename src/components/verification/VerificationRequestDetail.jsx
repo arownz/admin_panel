@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Button, Badge, Form, Row, Col, Spinner, Alert, Modal } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
@@ -14,11 +14,7 @@ const VerificationRequestDetail = () => {
   const [adminNotes, setAdminNotes] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  useEffect(() => {
-    fetchVerificationRequest();
-  }, [id]);
-
-  const fetchVerificationRequest = async () => {
+  const fetchVerificationRequest = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getVerificationRequest(id);
@@ -31,20 +27,24 @@ const VerificationRequestDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchVerificationRequest();
+  }, [fetchVerificationRequest]);
 
   const handleStatusUpdate = async (newStatus) => {
     try {
       setProcessing(true);
       await updateVerificationStatus(id, newStatus, adminNotes);
-      
+
       setRequest(prev => ({
         ...prev,
         status: newStatus,
         processedAt: new Date(),
         adminNotes: adminNotes
       }));
-      
+
       setError('');
     } catch (err) {
       console.error('Error updating verification status:', err);
@@ -127,8 +127,8 @@ const VerificationRequestDetail = () => {
           {/* Header */}
           <div className="d-flex justify-content-between align-items-start mb-4">
             <div>
-              <Button 
-                variant="outline-secondary" 
+              <Button
+                variant="outline-secondary"
                 onClick={() => navigate('/verification-requests')}
                 className="mb-3"
               >
@@ -277,11 +277,11 @@ const VerificationRequestDetail = () => {
                       {getStatusBadge(request?.status)}
                     </div>
                   </div>
-                  
+
                   <div className="mb-4">
                     <label className="form-label fw-bold text-muted mb-2">Submitted At</label>
                     <div className="fs-5 fw-medium">
-                      {request?.submittedAt ? 
+                      {request?.submittedAt ?
                         new Date(request.submittedAt).toLocaleString() : 'N/A'
                       }
                     </div>

@@ -7,12 +7,11 @@ import {
   updateDoc, 
   deleteDoc,
   query,
-  where,
   orderBy,
-  limit,
   addDoc,
   serverTimestamp,
-  onSnapshot
+  onSnapshot,
+  where
 } from 'firebase/firestore';
 
 // Convert Firestore timestamp to JavaScript date
@@ -481,7 +480,7 @@ export const updateSettings = async (settingsData) => {
 };
 
 // Update user profile
-export const updateProfile = async (profileData) => {
+export const updateProfile = async () => {
   try {
     // Implementation depends on your auth system
     console.log('Profile update not implemented for current auth system');
@@ -493,13 +492,170 @@ export const updateProfile = async (profileData) => {
 };
 
 // Update user password
-export const updatePassword = async (currentPassword, newPassword) => {
+export const updatePassword = async () => {
   try {
     // Implementation depends on your auth system
     console.log('Password update not implemented for current auth system');
     return true;
   } catch (error) {
     console.error('Error updating password:', error);
+    throw error;
+  }
+};
+
+// ===== Admin Codes Services ===== //
+
+// Generate a new admin code
+export const generateAdminCode = async (generatedBy, expiresInHours = 24, isOneTime = true) => {
+  try {
+    // Generate a random 8-character alphanumeric code
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + expiresInHours);
+
+    const adminCodeData = {
+      code,
+      generatedBy,
+      generatedAt: new Date(),
+      expiresAt,
+      isOneTime,
+      isUsed: false,
+      usedAt: null,
+      usedBy: null
+    };
+
+    const docRef = await addDoc(collection(db, 'adminCodes'), adminCodeData);
+    
+    return {
+      id: docRef.id,
+      ...adminCodeData
+    };
+  } catch (error) {
+    console.error('Error generating admin code:', error);
+    throw error;
+  }
+};
+
+// Validate admin code
+export const validateAdminCode = async (code) => {
+  try {
+    const q = query(
+      collection(db, 'adminCodes'),
+      where('code', '==', code),
+      where('isUsed', '==', false)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return { valid: false, reason: 'Invalid or already used code' };
+    }
+
+    const codeDoc = querySnapshot.docs[0];
+    const codeData = codeDoc.data();
+    
+    // Check if code is expired
+    const now = new Date();
+    const expiresAt = codeData.expiresAt.toDate();
+    
+    if (now > expiresAt) {
+      return { valid: false, reason: 'Code has expired' };
+    }
+
+    return { 
+      valid: true, 
+      codeId: codeDoc.id, 
+      codeData: {
+        ...codeData,
+        expiresAt: expiresAt
+      }
+    };
+  } catch (error) {
+    console.error('Error validating admin code:', error);
+    throw error;
+  }
+};
+
+// Mark admin code as used
+export const markCodeAsUsed = async (codeId, usedBy = 'admin') => {
+  try {
+    const codeRef = doc(db, 'adminCodes', codeId);
+    await updateDoc(codeRef, {
+      isUsed: true,
+      usedAt: new Date(),
+      usedBy
+    });
+    return true;
+  } catch (error) {
+    console.error('Error marking code as used:', error);
+    throw error;
+  }
+};
+
+// Get all admin codes (for management)
+export const getAdminCodes = async () => {
+  try {
+    const q = query(
+      collection(db, 'adminCodes'),
+      orderBy('generatedAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const codes = [];
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      codes.push({
+        id: doc.id,
+        ...data,
+        generatedAt: data.generatedAt?.toDate(),
+        expiresAt: data.expiresAt?.toDate(),
+        usedAt: data.usedAt?.toDate()
+      });
+    });
+    
+    return codes;
+  } catch (error) {
+    console.error('Error fetching admin codes:', error);
+    throw error;
+  }
+};
+
+// Delete admin code
+export const deleteAdminCode = async (codeId) => {
+  try {
+    await deleteDoc(doc(db, 'adminCodes', codeId));
+    return true;
+  } catch (error) {
+    console.error('Error deleting admin code:', error);
+    throw error;
+  }
+};
+
+// Cleanup expired codes
+export const cleanupExpiredCodes = async () => {
+  try {
+    const q = query(
+      collection(db, 'adminCodes'),
+      where('expiresAt', '<', new Date())
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const deletePromises = [];
+    
+    querySnapshot.forEach((doc) => {
+      deletePromises.push(deleteDoc(doc.ref));
+    });
+    
+    await Promise.all(deletePromises);
+    return querySnapshot.size; // Return number of deleted codes
+  } catch (error) {
+    console.error('Error cleaning up expired codes:', error);
     throw error;
   }
 };

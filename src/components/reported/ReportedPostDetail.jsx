@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Container, Card, Row, Col, Button, Alert, Badge, Form } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
-import { getReportedPost, updatePostStatus, resolveReport, deletePost } from '../../firebase/services';
+import { getReportedPost, resolveReport, deletePost } from '../../firebase/services';
 
 const ReportedPostDetail = () => {
   const { id } = useParams();
@@ -26,17 +26,17 @@ const ReportedPostDetail = () => {
         setLoading(false);
       }
     };
-    
+
     fetchReportedPostData();
   }, [id]);
 
   const handleResolveReport = async (action) => {
     try {
       setLoading(true);
-      
+
       // Possible actions: 'approve', 'reject', 'delete'
       await resolveReport(id, action, resolutionNote);
-      
+
       if (action === 'delete') {
         await deletePost(reportedPost.postId);
         navigate('/reported-posts');
@@ -55,7 +55,7 @@ const ReportedPostDetail = () => {
   };
 
   const getSeverityBadge = (severity) => {
-    switch(severity) {
+    switch (severity) {
       case 'high':
         return <Badge bg="danger">High</Badge>;
       case 'medium':
@@ -68,7 +68,7 @@ const ReportedPostDetail = () => {
   };
 
   const getStatusBadge = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending':
         return <Badge bg="warning">Pending Review</Badge>;
       case 'approved':
@@ -81,7 +81,7 @@ const ReportedPostDetail = () => {
         return <Badge bg="secondary">{status || 'Unknown'}</Badge>;
     }
   };
-  
+
   if (loading) {
     return (
       <div className="admin-container">
@@ -140,7 +140,7 @@ const ReportedPostDetail = () => {
               </Link>
             </div>
           </div>
-          
+
           <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="bg-white border-0 pt-4 pb-0">
               <div className="d-flex justify-content-between align-items-center">
@@ -179,7 +179,7 @@ const ReportedPostDetail = () => {
                 <Col sm={3} className="text-muted">Submitted:</Col>
                 <Col sm={9}>{reportedPost.createdAt ? new Date(reportedPost.createdAt).toLocaleString() : 'Unknown'}</Col>
               </Row>
-              
+
               {reportedPost.status === 'resolved' && (
                 <>
                   <Row className="mb-3">
@@ -200,7 +200,7 @@ const ReportedPostDetail = () => {
               )}
             </Card.Body>
           </Card>
-          
+
           <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="bg-white border-0 pt-4 pb-0">
               <h5 className="mb-0">Reported Content</h5>
@@ -230,9 +230,9 @@ const ReportedPostDetail = () => {
                 </div>
               </div>
               <div className="d-flex justify-content-between">
-                <Button 
-                  as={Link} 
-                  to={`/posts/${reportedPost.postId}`} 
+                <Button
+                  as={Link}
+                  to={`/posts/${reportedPost.postId}`}
                   variant="outline-primary"
                   className="me-2"
                 >
@@ -241,7 +241,7 @@ const ReportedPostDetail = () => {
               </div>
             </Card.Body>
           </Card>
-          
+
           {reportedPost.status !== 'resolved' && (
             <Card className="border-0 shadow-sm mb-4">
               <Card.Header className="bg-white border-0 pt-4 pb-0">
@@ -258,10 +258,10 @@ const ReportedPostDetail = () => {
                     placeholder="Add notes about how this report was handled..."
                   />
                 </Form.Group>
-                
+
                 <div className="d-flex gap-2">
-                  <Button 
-                    variant="danger" 
+                  <Button
+                    variant="danger"
                     onClick={() => {
                       if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
                         handleResolveReport('delete');

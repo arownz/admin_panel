@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
-import { useAuth } from '../../contexts/AuthContext'; // Updated path
+import { useAuth } from '../../hooks/useAuth';
+import { validateAdminCode, markCodeAsUsed } from '../../firebase/services';
 
 const Login = () => {
   const [authCode, setAuthCode] = useState('');
@@ -10,12 +11,9 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Single admin authentication code
-  const ADMIN_CODE = 'FepaNKKk4nuElM4gG5Ai';
-
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+
     if (!authCode.trim()) {
       setError('Please enter an authentication code');
       return;
@@ -24,17 +22,35 @@ const Login = () => {
     try {
       setLoading(true);
       setError('');
-      
-      if (authCode.trim() === ADMIN_CODE) {
-        login(ADMIN_CODE);
+
+      // Temporary bootstrap code for initial setup (remove after first admin code is generated)
+      const BOOTSTRAP_CODE = 'ADMINTEMP';
+
+      if (authCode.trim() === BOOTSTRAP_CODE) {
+        login(authCode.trim());
+        navigate('/');
+        return;
+      }
+
+      // Validate the admin code against Firebase
+      const validation = await validateAdminCode(authCode.trim());
+
+      if (validation.valid) {
+        // Mark the code as used if it's a one-time code
+        if (validation.codeData.isOneTime) {
+          await markCodeAsUsed(validation.codeId, 'admin-login');
+        }
+
+        // Login successful
+        login(authCode.trim());
         navigate('/');
       } else {
-        setError('Invalid authentication code');
+        setError(validation.reason || 'Invalid authentication code');
       }
-      
+
     } catch (err) {
       console.error('Login error:', err);
-      setError('Login failed. Please try again.');
+      setError('Login failed. Please check your code and try again.');
     } finally {
       setLoading(false);
     }
@@ -50,7 +66,10 @@ const Login = () => {
               <i className="bi bi-shield-lock-fill"></i>
             </div>
             <h1 className="display-6 fw-bold mb-2">TeamLexia Admin</h1>
-            <p className="text-muted fs-6">Enter your authentication code to access the admin panel</p>
+            <p className="text-muted fs-6">Enter your temporary authentication code to access the admin panel</p>
+            <div className="alert alert-info small">
+              <strong>First-time setup:</strong> Use code <code>BOOTSTRAP2024</code> to access Admin Codes management
+            </div>
           </div>
 
           {error && (
@@ -69,7 +88,7 @@ const Login = () => {
                 </span>
                 <Form.Control
                   type="password"
-                  placeholder="Enter your admin code"
+                  placeholder="Enter your temporary admin code"
                   value={authCode}
                   onChange={(e) => setAuthCode(e.target.value)}
                   disabled={loading}
@@ -80,9 +99,9 @@ const Login = () => {
               </div>
             </Form.Group>
 
-            <Button 
-              variant="primary" 
-              type="submit" 
+            <Button
+              variant="primary"
+              type="submit"
               className="w-100 btn-lg py-2"
               disabled={loading}
               style={{ fontSize: '1.1rem' }}

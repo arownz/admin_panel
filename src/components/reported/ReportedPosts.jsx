@@ -26,7 +26,7 @@ const ReportedPosts = () => {
         setLoading(true);
         const reportedPostsData = await getReportedPosts();
         console.log("Fetched reported posts data:", reportedPostsData);
-        
+
         setReportedPosts(reportedPostsData);
         setFilteredReports(reportedPostsData);
       } catch (err) {
@@ -36,7 +36,7 @@ const ReportedPosts = () => {
         setLoading(false);
       }
     };
-    
+
     fetchReportedPosts(); // This line ensures the function is actually called
   }, []);
 
@@ -45,32 +45,32 @@ const ReportedPosts = () => {
       setFilteredReports([]);
       return;
     }
-    
+
     let results = [...reportedPosts];
     console.log("Filtering reports. Starting count:", results.length);
-    
+
     // Apply reason filter
     if (reasonFilter !== 'all') {
       results = results.filter(report => report.reason === reasonFilter);
       console.log(`After reason filter (${reasonFilter}):`, results.length);
     }
-    
+
     // Apply status filter
     if (statusFilter !== 'all') {
       results = results.filter(report => report.status === statusFilter);
       console.log(`After status filter (${statusFilter}):`, results.length);
     }
-    
+
     // Apply search term
     if (searchTerm) {
-      results = results.filter(report => 
+      results = results.filter(report =>
         (report.post?.content?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (report.post?.authorName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (report.reportedBy?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       console.log(`After search filter (${searchTerm}):`, results.length);
     }
-    
+
     setFilteredReports(results);
   }, [searchTerm, reasonFilter, statusFilter, reportedPosts]);
 
@@ -98,11 +98,11 @@ const ReportedPosts = () => {
       if (actionType === 'dismiss') {
         // Resolve the report as dismissed/rejected
         await resolveReport(selectedReport.id, 'reject', 'Report dismissed by admin');
-        
+
         // Update local state to change status rather than remove
-        const updatedReports = reportedPosts.map(report => 
-          report.id === selectedReport.id 
-            ? { ...report, status: 'rejected', resolvedAt: new Date() } 
+        const updatedReports = reportedPosts.map(report =>
+          report.id === selectedReport.id
+            ? { ...report, status: 'rejected', resolvedAt: new Date() }
             : report
         );
         setReportedPosts(updatedReports);
@@ -110,7 +110,7 @@ const ReportedPosts = () => {
       } else if (actionType === 'remove') {
         // Resolve the report and delete the post
         console.log(`Attempting to delete post ${selectedReport.postId}`);
-        
+
         try {
           await deletePost(selectedReport.postId);
           console.log(`Post ${selectedReport.postId} deleted successfully`);
@@ -118,24 +118,24 @@ const ReportedPosts = () => {
           console.error("Error deleting post:", postError);
           // Continue with report resolution even if post deletion fails
         }
-        
+
         try {
           await resolveReport(selectedReport.id, 'delete', 'Post removed due to violation');
           console.log(`Report ${selectedReport.id} resolved successfully`);
         } catch (reportError) {
           console.error("Error resolving report:", reportError);
         }
-        
+
         // Update local state to change status rather than remove
-        const updatedReports = reportedPosts.map(report => 
-          report.id === selectedReport.id 
-            ? { ...report, status: 'deleted', resolvedAt: new Date() } 
+        const updatedReports = reportedPosts.map(report =>
+          report.id === selectedReport.id
+            ? { ...report, status: 'deleted', resolvedAt: new Date() }
             : report
         );
         setReportedPosts(updatedReports);
         setFilteredReports(updatedReports);
       }
-      
+
       // Always close the modal and reset state
       setShowConfirmAction(false);
       setSelectedReport(null);
@@ -143,7 +143,7 @@ const ReportedPosts = () => {
     } catch (err) {
       console.error(`Error ${actionType === 'dismiss' ? 'dismissing report' : 'removing post'}:`, err);
       setError(`Failed to ${actionType === 'dismiss' ? 'dismiss report' : 'remove post'}. Please try again.`);
-      
+
       // Still close the modal to avoid being stuck
       setShowConfirmAction(false);
       setSelectedReport(null);
@@ -170,19 +170,24 @@ const ReportedPosts = () => {
       <Sidebar />
       <div className={`main-content`}>
         <Container fluid className="py-3">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-              <i className="bi bi-flag me-2"></i>
-              Reported Posts
-            </h1>
+          <div className="d-flex align-items-center mb-4">
+            <i className="bi bi-flag fs-2 text-primary me-2"></i>
+            <h1 className="mb-0">Reported Posts</h1>
           </div>
+
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
+
           <div className="data-table-container">
             <div className="data-table-header">
               <h2>Reported Posts</h2>
               <div className="d-flex">
                 <div className="me-2">
-                  <select 
-                    className="form-select" 
+                  <select
+                    className="form-select"
                     value={reasonFilter}
                     onChange={handleReasonChange}
                   >
@@ -193,8 +198,8 @@ const ReportedPosts = () => {
                   </select>
                 </div>
                 <div className="me-2">
-                  <select 
-                    className="form-select" 
+                  <select
+                    className="form-select"
                     value={statusFilter}
                     onChange={handleStatusChange}
                   >
@@ -215,7 +220,7 @@ const ReportedPosts = () => {
                 </div>
               </div>
             </div>
-            
+
             {loading ? (
               <div className="text-center my-5">
                 <div className="spinner-border text-primary" role="status">
@@ -242,7 +247,7 @@ const ReportedPosts = () => {
                       <tr key={report.id} className={report.status !== 'pending' ? 'table-secondary' : ''}>
                         <td>{report.id}</td>
                         <td>
-                          {report.post?.content 
+                          {report.post?.content
                             ? (report.post.content.length > 50
                               ? report.post.content.substring(0, 50) + '...'
                               : report.post.content)
@@ -290,10 +295,10 @@ const ReportedPosts = () => {
                 </table>
               </div>
             )}
-            
+
             {/* Confirmation modal */}
-            <Modal 
-              show={showConfirmAction} 
+            <Modal
+              show={showConfirmAction}
               onHide={cancelAction}
               style={{ zIndex: 1060 }}
               backdrop="static" // This forces the user to interact with the modal
@@ -313,7 +318,7 @@ const ReportedPosts = () => {
                   </>
                 )}
                 <div className="alert alert-secondary">
-                  {selectedReport?.post?.content 
+                  {selectedReport?.post?.content
                     ? (selectedReport.post.content.length > 100
                       ? selectedReport.post.content.substring(0, 100) + '...'
                       : selectedReport.post.content)
@@ -324,8 +329,8 @@ const ReportedPosts = () => {
                 <Button variant="secondary" onClick={cancelAction}>
                   Cancel
                 </Button>
-                <Button 
-                  variant={actionType === 'dismiss' ? 'primary' : 'danger'} 
+                <Button
+                  variant={actionType === 'dismiss' ? 'primary' : 'danger'}
                   onClick={confirmAction}
                 >
                   {actionType === 'dismiss' ? 'Dismiss' : 'Remove'}
