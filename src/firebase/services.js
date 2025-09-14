@@ -521,7 +521,7 @@ export const generateAdminCode = async (generatedBy, expiresInHours = 24, isOneT
     const adminCodeData = {
       code,
       generatedBy,
-      generatedAt: new Date(),
+      generatedAt: serverTimestamp(),
       expiresAt,
       isOneTime,
       isUsed: false,
@@ -587,7 +587,7 @@ export const markCodeAsUsed = async (codeId, usedBy = 'admin') => {
     const codeRef = doc(db, 'adminCodes', codeId);
     await updateDoc(codeRef, {
       isUsed: true,
-      usedAt: new Date(),
+      usedAt: serverTimestamp(),
       usedBy
     });
     return true;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,8 +8,17 @@ const Login = () => {
   const [authCode, setAuthCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showBootstrapMessage, setShowBootstrapMessage] = useState(true);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Check if ADMINTEMP has been used in this browser session
+  useEffect(() => {
+    const hasUsedBootstrap = localStorage.getItem('admintemp_used');
+    if (hasUsedBootstrap === 'true') {
+      setShowBootstrapMessage(false);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,10 +32,20 @@ const Login = () => {
       setLoading(true);
       setError('');
 
-      // Temporary bootstrap code for initial setup (remove after first admin code is generated)
+      // Temporary bootstrap code for initial setup
       const BOOTSTRAP_CODE = 'ADMINTEMP';
+      const hasUsedBootstrap = localStorage.getItem('admintemp_used') === 'true';
 
       if (authCode.trim() === BOOTSTRAP_CODE) {
+        if (hasUsedBootstrap) {
+          setError('Bootstrap code has already been used in this browser session. Please use a generated admin code.');
+          return;
+        }
+
+        // Mark bootstrap code as used in this browser session
+        localStorage.setItem('admintemp_used', 'true');
+        setShowBootstrapMessage(false);
+
         login(authCode.trim());
         navigate('/');
         return;
@@ -67,9 +86,11 @@ const Login = () => {
             </div>
             <h1 className="display-6 fw-bold mb-2">TeamLexia Admin</h1>
             <p className="text-muted fs-6">Enter your temporary authentication code to access the admin panel</p>
-            <div className="alert alert-info small">
-              <strong>First-time setup:</strong> Use code <code>BOOTSTRAP2024</code> to access Admin Codes management
-            </div>
+            {showBootstrapMessage && (
+              <div className="alert alert-info small">
+                <strong>First-time setup:</strong> Use code <code>ADMINTEMP</code> to access Admin Codes management
+              </div>
+            )}
           </div>
 
           {error && (

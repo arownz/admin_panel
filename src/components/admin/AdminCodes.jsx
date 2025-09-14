@@ -5,7 +5,8 @@ import {
     generateAdminCode,
     getAdminCodes,
     deleteAdminCode,
-    cleanupExpiredCodes
+    cleanupExpiredCodes,
+    convertTimestamp
 } from '../../firebase/services';
 
 const AdminCodes = () => {
@@ -250,7 +251,7 @@ const AdminCodes = () => {
                                                             {code.isUsed ? (
                                                                 <small className="text-muted">
                                                                     {code.usedAt ?
-                                                                        new Date(code.usedAt).toLocaleDateString() :
+                                                                        convertTimestamp(code.usedAt)?.toLocaleDateString() || 'Yes' :
                                                                         'Yes'
                                                                     }
                                                                 </small>
