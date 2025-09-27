@@ -4,7 +4,7 @@ import { Button } from 'react-bootstrap';
 
 const ThemeToggle = () => {
   const [darkMode, setDarkMode] = React.useState(false);
-  
+
   React.useEffect(() => {
     const isDark = localStorage.getItem('darkMode') === 'true';
     setDarkMode(isDark);
@@ -12,18 +12,18 @@ const ThemeToggle = () => {
       document.body.classList.add('dark-mode');
     }
   }, []);
-  
+
   const toggleTheme = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
     localStorage.setItem('darkMode', newMode);
     document.body.classList.toggle('dark-mode');
   };
-  
+
   return (
-    <Button 
-      variant="link" 
-      className="theme-toggle p-0" 
+    <Button
+      variant="link"
+      className="theme-toggle p-0"
       onClick={toggleTheme}
       title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
     >
