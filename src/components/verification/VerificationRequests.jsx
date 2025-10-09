@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Card, Table, Badge, Button, Form, InputGroup, Spinner, Alert, Modal } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
+import TableSkeleton from '../TableSkeleton';
 import { useSidebar } from '../../hooks/useSidebar';
 import { getVerificationRequests, updateVerificationStatus } from '../../firebase/services';
 
@@ -150,27 +151,6 @@ const VerificationRequests = () => {
     return professions.sort();
   };
 
-  if (loading) {
-    return (
-      <div className="admin-container">
-        <Sidebar />
-        <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
-          <i className="bi bi-list fs-4"></i>
-        </button>
-        <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Container fluid className="py-3">
-            <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
-              <div className="text-center">
-                <Spinner animation="border" variant="primary" />
-                <div className="mt-2">Loading verification requests...</div>
-              </div>
-            </div>
-          </Container>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="admin-container">
       <Sidebar />
@@ -180,7 +160,7 @@ const VerificationRequests = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <h1 className="mb-0">Verification Requests</h1>
+            <h1 className="mb-0">Verification Requests Management</h1>
           </div>
 
           {error && (
@@ -254,7 +234,9 @@ const VerificationRequests = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredRequests.length === 0 ? (
+                    {loading ? (
+                      <TableSkeleton rows={5} columns={6} />
+                    ) : filteredRequests.length === 0 ? (
                       <tr>
                         <td colSpan="6" className="text-center py-5">
                           <div>

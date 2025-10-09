@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../Sidebar';
+import TableSkeleton from '../TableSkeleton';
 import { useSidebar } from '../../hooks/useSidebar';
 import { getAppointments } from '../../firebase/services';
-import { Container } from 'react-bootstrap';
+import { Container, Badge, Card, Form, InputGroup } from 'react-bootstrap';
 
 const Appointments = () => {
   const { toggleSidebar, isCollapsed } = useSidebar();
@@ -136,108 +137,132 @@ const Appointments = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <h1 className="mb-0">Appointments</h1>
+            <h1 className="mb-0">Appointments Management</h1>
           </div>
-          <div className="data-table-container">
-            <div className="data-table-header">
-              <div className="d-flex">
-                <div className="me-2">
-                  <select
-                    className="form-select"
+
+          <Card className="border-0 shadow-sm">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div className="d-flex align-items-center gap-2 mb-2 mb-md-0">
+                  <Form.Select
                     value={statusFilter}
                     onChange={handleStatusChange}
+                    style={{ width: '150px' }}
                   >
                     <option value="all">All Status</option>
                     <option value="cancelled">Cancelled</option>
                     <option value="pending">Pending</option>
                     <option value="accepted">Accepted</option>
                     <option value="completed">Completed</option>
-                  </select>
-                </div>
-                <div className="search-bar">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search appointments..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                </div>
-              </div>
-            </div>
+                  </Form.Select>
 
-            {loading ? (
-              <div className="text-center my-5">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
+                  <InputGroup style={{ width: '250px' }}>
+                    <InputGroup.Text>
+                      <i className="bi bi-search"></i>
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Search appointments..."
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
+                  </InputGroup>
+                </div>
+
+                <div className="text-muted">
+                  Total: {filteredAppointments.length} appointments
                 </div>
               </div>
-            ) : error ? (
-              <div className="alert alert-danger" role="alert">
-                {error}
-              </div>
-            ) : (
-              <>
-                <div className="table-responsive">
-                  <table className="table table-hover">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>User</th>
-                        <th>Professional</th>
-                        <th>Specialty</th>
-                        <th>Date & Time</th>
-                        <th>Status</th>
-                        <th>Created At</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredAppointments.map(appointment => (
-                        <tr key={appointment.id}>
-                          <td>{appointment.id}</td>
-                          <td>{appointment.userName}</td>
-                          <td>{appointment.professionalName}</td>
-                          <td>{appointment.specialty}</td>
-                          <td>{formatDate(appointment.appointmentTime)}</td>
-                          <td>
-                            {getStatusBadge(appointment.status)}
-                          </td>
-                          <td>{formatDate(appointment.createdAt)}</td>
-                          <td>
-                            {/* Removed Edit and Delete buttons, kept only View */}
-                            <Link to={`/appointments/${appointment.id}`} className="btn btn-sm btn-info">
-                              <i className="bi bi-eye"></i>
-                            </Link>
-                          </td>
+
+              {loading ? (
+                <>
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>User</th>
+                          <th>Professional</th>
+                          <th>Specialty</th>
+                          <th>Date & Time</th>
+                          <th>Status</th>
+                          <th>Created At</th>
+                          <th>Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                  <small className="text-muted">
-                    Showing {filteredAppointments.length} of {appointments.length} appointments
-                  </small>
-                  <div className="d-flex gap-3">
-                    <small className="text-muted">
-                      <Badge bg="warning" className="me-1">{appointments.filter(a => a.status === 'scheduled').length}</Badge>
-                      Scheduled
-                    </small>
-                    <small className="text-muted">
-                      <Badge bg="success" className="me-1">{appointments.filter(a => a.status === 'completed').length}</Badge>
-                      Completed
-                    </small>
-                    <small className="text-muted">
-                      <Badge bg="danger" className="me-1">{appointments.filter(a => a.status === 'cancelled').length}</Badge>
-                      Cancelled
-                    </small>
+                      </thead>
+                      <tbody>
+                        <TableSkeleton rows={5} columns={8} />
+                      </tbody>
+                    </table>
                   </div>
+                </>
+              ) : error ? (
+                <div className="alert alert-danger" role="alert">
+                  {error}
                 </div>
-              </>
-            )}
-          </div>
+              ) : (
+                <>
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>User</th>
+                          <th>Professional</th>
+                          <th>Specialty</th>
+                          <th>Date & Time</th>
+                          <th>Status</th>
+                          <th>Created At</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredAppointments.map(appointment => (
+                          <tr key={appointment.id}>
+                            <td>{appointment.id}</td>
+                            <td>{appointment.userName}</td>
+                            <td>{appointment.professionalName}</td>
+                            <td>{appointment.specialty}</td>
+                            <td>{formatDate(appointment.appointmentTime)}</td>
+                            <td>
+                              {getStatusBadge(appointment.status)}
+                            </td>
+                            <td>{formatDate(appointment.createdAt)}</td>
+                            <td>
+                              {/* Removed Edit and Delete buttons, kept only View */}
+                              <Link to={`/appointments/${appointment.id}`} className="btn btn-sm btn-info">
+                                <i className="bi bi-eye"></i>
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <small className="text-muted">
+                      Showing {filteredAppointments.length} of {appointments.length} appointments
+                    </small>
+                    <div className="d-flex gap-3">
+                      <small className="text-muted">
+                        <Badge bg="warning" className="me-1">{appointments.filter(a => a.status === 'scheduled').length}</Badge>
+                        Scheduled
+                      </small>
+                      <small className="text-muted">
+                        <Badge bg="success" className="me-1">{appointments.filter(a => a.status === 'completed').length}</Badge>
+                        Completed
+                      </small>
+                      <small className="text-muted">
+                        <Badge bg="danger" className="me-1">{appointments.filter(a => a.status === 'cancelled').length}</Badge>
+                        Cancelled
+                      </small>
+                    </div>
+                  </div>
+                </>
+              )}
+            </Card.Body>
+          </Card>
         </Container>
       </div>
     </div>

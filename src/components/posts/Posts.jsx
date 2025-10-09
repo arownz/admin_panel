@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Card, Table, Button, Form, Modal, Alert, Badge } from 'react-bootstrap';
+import { Container, Card, Table, Button, Form, Modal, Alert, Badge, InputGroup } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
+import TableSkeleton from '../TableSkeleton';
 import { useSidebar } from '../../hooks/useSidebar';
 import { getPosts, deletePost } from '../../firebase/services';
 
@@ -169,13 +170,17 @@ const Posts = () => {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
                 <div className="d-flex align-items-center gap-2 mb-2 mb-md-0">
-                  <Form.Control
-                    type="text"
-                    placeholder="Search posts..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    style={{ width: '250px' }}
-                  />
+                  <InputGroup style={{ width: '250px' }}>
+                    <InputGroup.Text>
+                      <i className="bi bi-search"></i>
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Search posts..."
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
+                  </InputGroup>
                 </div>
 
                 <div className="text-muted">
@@ -184,10 +189,23 @@ const Posts = () => {
               </div>
 
               {loading ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
+                <div className="table-responsive">
+                  <Table hover className="mb-0">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Title/Content</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Engagement</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <TableSkeleton rows={5} columns={7} />
+                    </tbody>
+                  </Table>
                 </div>
               ) : (
                 <>

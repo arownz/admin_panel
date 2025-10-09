@@ -30,6 +30,44 @@ const AppointmentDetail = () => {
     fetchAppointmentData();
   }, [id]);
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+
+    try {
+      let date;
+
+      // Handle Firestore Timestamp objects
+      if (timestamp && typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      }
+      // Handle timestamp objects with seconds
+      else if (timestamp && timestamp.seconds) {
+        date = new Date(timestamp.seconds * 1000);
+      }
+      // Handle regular date strings/numbers
+      else {
+        date = new Date(timestamp);
+      }
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'completed':
@@ -121,7 +159,7 @@ const AppointmentDetail = () => {
       <div className="main-content">
         <Container fluid className="py-3">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>Appointment Details</h1>
+            <h1 className="display-6 mb-0">Appointment Details</h1>
             <div>
               <Link to="/appointments" className="btn btn-secondary">
                 <i className="bi bi-arrow-left"></i> Back
@@ -148,16 +186,14 @@ const AppointmentDetail = () => {
                 <Col sm={4} className="text-muted">Date & Time:</Col>
                 <Col sm={8}>
                   {appointment.appointmentTime ?
-                    new Date(appointment.appointmentTime).toLocaleString() :
+                    formatDate(appointment.appointmentTime) :
                     'Not scheduled'}
                 </Col>
               </Row>
               <Row className="mb-3">
                 <Col sm={4} className="text-muted">Created At:</Col>
                 <Col sm={8}>
-                  {appointment.createdAt ?
-                    new Date(appointment.createdAt).toLocaleString() :
-                    'Unknown'}
+                  {formatDate(appointment.createdAt)}
                 </Col>
               </Row>
             </Card.Body>

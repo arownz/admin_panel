@@ -92,6 +92,13 @@ const Login = () => {
             </div>
             <h1 className="h3 h1-md fw-bold mb-2">TeamLexia Admin</h1>
             <p className="text-muted small">Enter your authentication code to access the admin panel</p>
+
+            {/* Security Warning */}
+            <div className="alert alert-warning small mb-3">
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>Important:</strong> Always save your admin codes securely! Clearing browser data will reset authentication, allowing unauthorized access via bootstrap code.
+            </div>
+
             {showBootstrapMessage && (
               <div className="alert alert-info small">
                 <strong>First-time setup:</strong> Use code <code>ADMINTEMP</code> to access Admin Codes management
@@ -107,12 +114,12 @@ const Login = () => {
           )}
 
           <Form onSubmit={handleLogin}>
-            <Form.Group className="mb-3">
-              <Form.Label className="fs-6 fw-semibold">Authentication Code</Form.Label>
-              <div className="input-group">
-                <span className="input-group-text bg-light border-end-0">
-                  <i className="bi bi-key-fill text-primary"></i>
-                </span>
+            <Form.Group className="mb-4">
+              <Form.Label className="fs-6 fw-semibold text-dark">
+                <i className="bi bi-shield-lock-fill me-2 text-primary"></i>
+                Authentication Code
+              </Form.Label>
+              <div className="position-relative">
                 <Form.Control
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your admin code"
@@ -120,23 +127,51 @@ const Login = () => {
                   onChange={(e) => setAuthCode(e.target.value)}
                   disabled={loading}
                   autoFocus
-                  className="form-control-lg border-start-0 border-end-0"
-                  style={{ fontSize: '1rem' }}
+                  className="form-control-lg ps-5 pe-5"
+                  style={{
+                    fontSize: '1.1rem',
+                    letterSpacing: '0.1em',
+                    fontFamily: 'monospace',
+                    fontWeight: '600',
+                    border: '2px solid #4361ee',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(67, 97, 238, 0.15)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.boxShadow = '0 6px 16px rgba(67, 97, 238, 0.25)';
+                    e.target.style.transform = 'translateY(-2px)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.boxShadow = '0 4px 12px rgba(67, 97, 238, 0.15)';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
                 />
+                <div
+                  className="position-absolute top-50 translate-middle-y"
+                  style={{ left: '18px' }}
+                >
+                  <i className="bi bi-key-fill text-primary" style={{ fontSize: '1.2rem' }}></i>
+                </div>
                 <button
-                  className="btn btn-outline-secondary border-start-0"
+                  className="btn btn-link position-absolute top-50 translate-middle-y"
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                   title={showPassword ? "Hide password" : "Show password"}
                   style={{
-                    borderTopLeftRadius: 0,
-                    borderBottomLeftRadius: 0
+                    right: '12px',
+                    textDecoration: 'none',
+                    color: '#6c757d'
                   }}
                 >
-                  <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                  <i className={`bi ${showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'}`} style={{ fontSize: '1.2rem' }}></i>
                 </button>
               </div>
+              <Form.Text className="text-muted d-flex align-items-center mt-2">
+                <i className="bi bi-info-circle me-2"></i>
+                Enter the 8-character alphanumeric admin code
+              </Form.Text>
             </Form.Group>
 
             <Button

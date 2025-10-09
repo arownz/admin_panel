@@ -68,6 +68,44 @@ const ReportedPostDetail = () => {
     setShowConfirmDelete(false);
   };
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'Unknown';
+
+    try {
+      let date;
+
+      // Handle Firestore Timestamp objects
+      if (timestamp && typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      }
+      // Handle timestamp objects with seconds
+      else if (timestamp && timestamp.seconds) {
+        date = new Date(timestamp.seconds * 1000);
+      }
+      // Handle regular date strings/numbers
+      else {
+        date = new Date(timestamp);
+      }
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   const getSeverityBadge = (severity) => {
     switch (severity) {
       case 'high':
@@ -95,7 +133,7 @@ const ReportedPostDetail = () => {
         return (
           <Badge bg="secondary">
             <i className="bi bi-dash-circle me-2"></i>
-            {severity?.toUpperCase() || 'UNKNOWN'}
+            {severity?.toUpperCase() || 'NOT SPECIFIED'}
           </Badge>
         );
     }
@@ -118,10 +156,18 @@ const ReportedPostDetail = () => {
           </Badge>
         );
       case 'rejected':
+      case 'dismissed':
         return (
           <Badge bg="danger">
             <i className="bi bi-x-circle me-2"></i>
-            REJECTED
+            DISMISSED
+          </Badge>
+        );
+      case 'deleted':
+        return (
+          <Badge bg="danger">
+            <i className="bi bi-trash me-2"></i>
+            REMOVED
           </Badge>
         );
       case 'resolved':
@@ -192,7 +238,7 @@ const ReportedPostDetail = () => {
       <div className="main-content">
         <Container fluid className="py-3">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>Reported Post Review</h1>
+            <h1 className="display-6 mb-0">Reported Post Review</h1>
             <div>
               <Link to="/reported-posts" className="btn btn-secondary">
                 <i className="bi bi-arrow-left"></i> Back to List
@@ -236,7 +282,7 @@ const ReportedPostDetail = () => {
               </Row>
               <Row className="mb-3">
                 <Col sm={3} className="text-muted">Submitted:</Col>
-                <Col sm={9}>{reportedPost.createdAt ? new Date(reportedPost.createdAt).toLocaleString() : 'Unknown'}</Col>
+                <Col sm={9}>{formatDate(reportedPost.createdAt || reportedPost.reportedAt)}</Col>
               </Row>
 
               {reportedPost.status === 'resolved' && (
@@ -266,10 +312,6 @@ const ReportedPostDetail = () => {
             </Card.Header>
             <Card.Body>
               <Row className="mb-3">
-                <Col sm={3} className="text-muted">Post Title:</Col>
-                <Col sm={9}><strong>{reportedPost.postTitle || 'Untitled'}</strong></Col>
-              </Row>
-              <Row className="mb-3">
                 <Col sm={3} className="text-muted">Post Author:</Col>
                 <Col sm={9}>
                   {reportedPost.authorName ? (
@@ -280,24 +322,29 @@ const ReportedPostDetail = () => {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col sm={3} className="text-muted">Content Preview:</Col>
-                <Col sm={9}></Col>
+                <Col sm={3} className="text-muted">Post Status:</Col>
+                <Col sm={9}>
+                  {reportedPost.status === 'deleted' ? (
+                    <Badge bg="secondary">Post has been removed from system</Badge>
+                  ) : reportedPost.postId ? (
+                    <Badge bg="success">Post exists in system</Badge>
+                  ) : (
+                    <Badge bg="secondary">Post no longer available</Badge>
+                  )}
+                </Col>
               </Row>
-              <div className="border rounded p-3 bg-light mb-3">
-                <div className="post-content" style={{ whiteSpace: 'pre-wrap' }}>
-                  {reportedPost.postContent || 'Content not available'}
+              {reportedPost.postId && reportedPost.status !== 'deleted' && (
+                <div className="d-flex justify-content-between">
+                  <Button
+                    as={Link}
+                    to={`/posts/${reportedPost.postId}`}
+                    variant="outline-primary"
+                    className="me-2"
+                  >
+                    <i className="bi bi-eye me-1"></i> View Full Post
+                  </Button>
                 </div>
-              </div>
-              <div className="d-flex justify-content-between">
-                <Button
-                  as={Link}
-                  to={`/posts/${reportedPost.postId}`}
-                  variant="outline-primary"
-                  className="me-2"
-                >
-                  <i className="bi bi-eye me-1"></i> View Full Post
-                </Button>
-              </div>
+              )}
             </Card.Body>
           </Card>
 

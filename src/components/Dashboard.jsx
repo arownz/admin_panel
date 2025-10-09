@@ -400,7 +400,7 @@ const Dashboard = () => {
             <Col md={6}>
               <Card className="border-0 shadow-sm">
                 <Card.Body className="text-center">
-                  <h5 className="text-muted">New Users This Month</h5>
+                  <h5 className="text-muted">New App Users This Month</h5>
                   <div className="display-4 fw-bold text-success">{stats.newUsersThisMonth}</div>
                   <small className="text-muted">Growth indicator</small>
                 </Card.Body>

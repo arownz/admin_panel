@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Card, Table, Button, Form, Badge, Spinner, Alert, Modal } from 'react-bootstrap';
+import { Container, Card, Table, Button, Form, Badge, Spinner, Alert, Modal, InputGroup } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
+import TableSkeleton from '../TableSkeleton';
 import { useSidebar } from '../../hooks/useSidebar';
 import { getUsersRealtime, deleteUser } from '../../firebase/services';
 
@@ -176,22 +177,6 @@ const Users = () => {
     setUserToDelete(null);
   };
 
-  if (loading) {
-    return (
-      <div className="admin-container">
-        <Sidebar />
-        <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-            <div className="text-center">
-              <Spinner animation="border" variant="primary" />
-              <div className="mt-3">Loading users...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="admin-container">
       <Sidebar />
@@ -206,7 +191,7 @@ const Users = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <h1 className="mb-0">User Management</h1>
+            <h1 className="mb-0">Users Management</h1>
           </div>
 
           {error && (
@@ -225,14 +210,18 @@ const Users = () => {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
                 <div className="d-flex align-items-center gap-2 mb-2 mb-md-0">
-                  <Form.Control
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ width: '250px' }}
-                    aria-label="Search users by name, email, profession, or affiliation"
-                  />
+                  <InputGroup style={{ width: '250px' }}>
+                    <InputGroup.Text>
+                      <i className="bi bi-search"></i>
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Search users..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      aria-label="Search users by name, email, profession, or affiliation"
+                    />
+                  </InputGroup>
 
                   <Form.Select
                     value={roleFilter}
@@ -276,7 +265,9 @@ const Users = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.length === 0 ? (
+                    {loading ? (
+                      <TableSkeleton rows={5} columns={6} />
+                    ) : filteredUsers.length === 0 ? (
                       <tr>
                         <td colSpan="6" className="text-center py-5">
                           <div>

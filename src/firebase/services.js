@@ -349,13 +349,27 @@ export const getReportedPosts = async () => {
     const reportsCollection = collection(db, 'reported_posts');
     const snapshot = await getDocs(reportsCollection);
     
-    // Fetch associated post data for each report
+    // Fetch associated post data and author info for each report
     const reportsWithPosts = await Promise.all(
       snapshot.docs.map(async (reportDoc) => {
         const reportData = {
           id: reportDoc.id,
           ...reportDoc.data()
         };
+        
+        // Fetch author name from authorId if available
+        if (reportData.authorId) {
+          try {
+            const userRef = doc(db, 'users', reportData.authorId);
+            const userSnapshot = await getDoc(userRef);
+            if (userSnapshot.exists()) {
+              const userData = userSnapshot.data();
+              reportData.authorName = userData.name || userData.displayName || 'Unknown User';
+            }
+          } catch (userError) {
+            console.warn(`Could not fetch user ${reportData.authorId}: ${userError.message}`);
+          }
+        }
         
         // If the report contains a postId, fetch the associated post
         if (reportData.postId) {
@@ -364,15 +378,37 @@ export const getReportedPosts = async () => {
             const postSnapshot = await getDoc(postRef);
             
             if (postSnapshot.exists()) {
-              reportData.post = {
+              const postData = {
                 id: postSnapshot.id,
                 ...postSnapshot.data()
               };
+              
+              // If post has authorId but no authorName, fetch from users collection
+              if (postData.authorId && !postData.authorName && !reportData.authorName) {
+                try {
+                  const userRef = doc(db, 'users', postData.authorId);
+                  const userSnapshot = await getDoc(userRef);
+                  if (userSnapshot.exists()) {
+                    const userData = userSnapshot.data();
+                    postData.authorName = userData.name || userData.displayName || 'Unknown User';
+                    reportData.authorName = postData.authorName;
+                  }
+                } catch (userError) {
+                  console.warn(`Could not fetch user ${postData.authorId}: ${userError.message}`);
+                }
+              }
+              
+              reportData.post = postData;
             }
           } catch (postError) {
             console.warn(`Could not fetch post ${reportData.postId}: ${postError.message}`);
             // Continue without the post data if it's not available
           }
+        }
+        
+        // Set default if still no authorName
+        if (!reportData.authorName) {
+          reportData.authorName = 'Unknown';
         }
         
         return reportData;
@@ -405,6 +441,21 @@ export const getReportedPost = async (reportId) => {
       ...reportSnapshot.data()
     };
     
+    // Fetch reporter information if reportedBy exists
+    if (reportData.reportedBy && !reportData.reporterName) {
+      try {
+        const reporterRef = doc(db, 'users', reportData.reportedBy);
+        const reporterSnapshot = await getDoc(reporterRef);
+        if (reporterSnapshot.exists()) {
+          const reporterData = reporterSnapshot.data();
+          reportData.reporterName = reporterData.name || reporterData.displayName || 'Unknown User';
+          reportData.reporterId = reportData.reportedBy;
+        }
+      } catch (reporterError) {
+        console.warn(`Could not fetch reporter ${reportData.reportedBy}: ${reporterError.message}`);
+      }
+    }
+    
     // If the report contains a postId, fetch the associated post
     if (reportData.postId) {
       try {
@@ -412,14 +463,47 @@ export const getReportedPost = async (reportId) => {
         const postSnapshot = await getDoc(postRef);
         
         if (postSnapshot.exists()) {
-          reportData.post = {
+          const postData = {
             id: postSnapshot.id,
             ...postSnapshot.data()
           };
+          
+          // If post has authorId but no authorName, fetch from users collection
+          if (postData.authorId && !postData.authorName) {
+            try {
+              const userRef = doc(db, 'users', postData.authorId);
+              const userSnapshot = await getDoc(userRef);
+              if (userSnapshot.exists()) {
+                const userData = userSnapshot.data();
+                postData.authorName = userData.name || userData.displayName || 'Unknown User';
+              }
+            } catch (userError) {
+              console.warn(`Could not fetch user ${postData.authorId}: ${userError.message}`);
+            }
+          }
+          
+          reportData.post = postData;
+          // Also set authorName at report level for easier access
+          reportData.authorName = postData.authorName || 'Unknown';
+          reportData.authorId = postData.authorId;
         }
       } catch (postError) {
         console.warn(`Could not fetch associated post: ${postError.message}`);
         // Continue without the post data if it's not available
+      }
+    }
+    
+    // If we still don't have authorName and authorId exists in report, fetch it
+    if (!reportData.authorName && reportData.authorId) {
+      try {
+        const authorRef = doc(db, 'users', reportData.authorId);
+        const authorSnapshot = await getDoc(authorRef);
+        if (authorSnapshot.exists()) {
+          const authorData = authorSnapshot.data();
+          reportData.authorName = authorData.name || authorData.displayName || 'Unknown User';
+        }
+      } catch (authorError) {
+        console.warn(`Could not fetch author ${reportData.authorId}: ${authorError.message}`);
       }
     }
     

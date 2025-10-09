@@ -41,7 +41,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { path: '/dashboard', icon: 'bi-speedometer2', label: 'Dashboard' },
-    { path: '/users', icon: 'bi-people', label: 'User Management' },
+    { path: '/users', icon: 'bi-people', label: 'Users' },
     { path: '/verification-requests', icon: 'bi-patch-check', label: 'Verification Requests' },
     { path: '/appointments', icon: 'bi-calendar-check', label: 'Appointments' },
     { path: '/posts', icon: 'bi-file-post', label: 'Posts' },

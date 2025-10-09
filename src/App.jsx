@@ -16,6 +16,7 @@ import AppointmentDetail from './components/appointments/AppointmentDetail';
 import VerificationRequests from './components/verification/VerificationRequests';
 import VerificationRequestDetail from './components/verification/VerificationRequestDetail';
 import AdminCodes from './components/admin/AdminCodes';
+import LoadingBar from './components/LoadingBar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css';
@@ -28,6 +29,7 @@ function App() {
           v7_startTransition: true,
           v7_relativeSplatPath: true
         }}>
+          <LoadingBar />
           <div className="App">
             <Routes>
               {/* Public Routes */}

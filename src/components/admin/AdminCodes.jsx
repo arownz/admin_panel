@@ -236,6 +236,28 @@ const AdminCodes = () => {
                         <h1 className="mb-0">Admin Code Management</h1>
                     </div>
 
+                    {/* Critical Security Warning */}
+                    <Alert variant="danger" className="border-danger shadow-sm mb-4">
+                        <div className="d-flex align-items-start">
+                            <i className="bi bi-shield-exclamation fs-2 me-3 text-danger"></i>
+                            <div>
+                                <h5 className="alert-heading mb-2">
+                                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                    Critical Security Warning
+                                </h5>
+                                <p className="mb-2">
+                                    <strong>ALWAYS save your admin codes in a secure location!</strong> Without saved codes, unauthorized users can reset browser data and use the bootstrap code (<code>ADMINTEMP</code>) to regain access to the admin panel.
+                                </p>
+                                <ul className="mb-0 ps-3">
+                                    <li>Generate at least one long-term reusable code and store it securely</li>
+                                    <li>Never share admin codes with unauthorized personnel</li>
+                                    <li>Regularly review and cleanup expired/unused codes</li>
+                                    <li>The bootstrap code only works once per browser session but resets on data clear</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </Alert>
+
                     {error && (
                         <Alert variant="danger" onClose={() => setError(null)} dismissible>
                             {error}
@@ -269,55 +291,44 @@ const AdminCodes = () => {
                                 </div>
                             </div>
 
-                            {/* Filter Section */}
-                            <div className="mb-4 p-3 bg-light rounded">
-                                <div className="row g-3">
-                                    <div className="col-md-3">
-                                        <Form.Label className="small text-muted mb-1">Status</Form.Label>
-                                        <Form.Select
-                                            size="sm"
-                                            value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value)}
-                                            aria-label="Filter admin codes by status"
-                                        >
-                                            <option value="all">All Status</option>
-                                            <option value="active">Active</option>
-                                            <option value="expired">Expired</option>
-                                            <option value="used">Used</option>
-                                        </Form.Select>
-                                    </div>
-                                    <div className="col-md-3">
-                                        <Form.Label className="small text-muted mb-1">Type</Form.Label>
-                                        <Form.Select
-                                            size="sm"
-                                            value={typeFilter}
-                                            onChange={(e) => setTypeFilter(e.target.value)}
-                                            aria-label="Filter admin codes by type"
-                                        >
-                                            <option value="all">All Types</option>
-                                            <option value="one-time">One-Time</option>
-                                            <option value="reusable">Reusable</option>
-                                        </Form.Select>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <Form.Label className="small text-muted mb-1">Search Code</Form.Label>
-                                        <InputGroup size="sm">
-                                            <InputGroup.Text>
-                                                <i className="bi bi-search"></i>
-                                            </InputGroup.Text>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Search by code..."
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                                aria-label="Search admin codes"
-                                            />
-                                        </InputGroup>
-                                    </div>
+                            {/* Filter Section - Updated to match other pages */}
+                            <div className="d-flex gap-2 mb-3 align-items-end flex-wrap">
+                                <div style={{ minWidth: '150px' }}>
+                                    <Form.Select
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                        aria-label="Filter admin codes by status"
+                                    >
+                                        <option value="all">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="expired">Expired</option>
+                                        <option value="used">Used</option>
+                                    </Form.Select>
                                 </div>
-                                <div className="mt-2 small text-muted">
-                                    Showing {filteredCodes.length} of {codes.length} codes
+                                <div style={{ minWidth: '150px' }}>
+                                    <Form.Select
+                                        value={typeFilter}
+                                        onChange={(e) => setTypeFilter(e.target.value)}
+                                        aria-label="Filter admin codes by type"
+                                    >
+                                        <option value="all">All Types</option>
+                                        <option value="one-time">One-Time</option>
+                                        <option value="reusable">Reusable</option>
+                                    </Form.Select>
                                 </div>
+                                <div className="flex-grow-4" style={{ minWidth: '200px' }}>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Search admin codes..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        aria-label="Search admin codes"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mb-3 text-muted">
+                                Showing <strong>{filteredCodes.length}</strong> of <strong>{codes.length}</strong> codes
                             </div>
 
                             {loading ? (

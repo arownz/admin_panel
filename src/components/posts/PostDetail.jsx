@@ -25,7 +25,7 @@ const PostDetail = () => {
         setLoading(false);
       }
     };
-    
+
     fetchPostData();
   }, [id]);
 
@@ -49,8 +49,46 @@ const PostDetail = () => {
     }
   };
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+
+    try {
+      let date;
+
+      // Handle Firestore Timestamp objects
+      if (timestamp && typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      }
+      // Handle timestamp objects with seconds
+      else if (timestamp && timestamp.seconds) {
+        date = new Date(timestamp.seconds * 1000);
+      }
+      // Handle regular date strings/numbers
+      else {
+        date = new Date(timestamp);
+      }
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   const getStatusBadge = (status) => {
-    switch(status) {
+    switch (status) {
       case 'published':
         return <Badge bg="success">Published</Badge>;
       case 'draft':
@@ -116,7 +154,7 @@ const PostDetail = () => {
         <Container fluid className="py-3">
           {/* Update the button group in the header section - remove the Edit button */}
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>Post Details</h1>
+            <h1 className="display-6 mb-0">Post Details</h1>
             <div>
               <Link to="/posts" className="btn btn-secondary me-2">
                 <i className="bi bi-arrow-left"></i> Back
@@ -127,7 +165,7 @@ const PostDetail = () => {
               </Button>
             </div>
           </div>
-          
+
           <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="bg-white border-0 pt-4 pb-0">
               <div className="d-flex justify-content-between align-items-center">
@@ -141,7 +179,7 @@ const PostDetail = () => {
                   {post.content}
                 </div>
               </div>
-              
+
               <Row className="mt-4">
                 <Col md={4}>
                   <div className="text-muted mb-2">Author</div>
@@ -159,14 +197,14 @@ const PostDetail = () => {
                 </Col>
                 <Col md={4}>
                   <div className="text-muted mb-2">Created</div>
-                  <div>{post.createdAt ? new Date(post.createdAt).toLocaleString() : 'Unknown'}</div>
+                  <div>{formatDate(post.createdAt)}</div>
                 </Col>
               </Row>
-              
+
               <Row className="mt-3">
                 <Col md={4}>
                   <div className="text-muted mb-2">Last Updated</div>
-                  <div>{post.updatedAt ? new Date(post.updatedAt).toLocaleString() : 'N/A'}</div>
+                  <div>{post.updatedAt ? formatDate(post.updatedAt) : (post.createdAt ? formatDate(post.createdAt) : 'N/A')}</div>
                 </Col>
                 <Col md={8}>
                   <div className="text-muted mb-2">Tags</div>
@@ -183,7 +221,7 @@ const PostDetail = () => {
               </Row>
             </Card.Body>
           </Card>
-          
+
           <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="bg-white border-0 pt-4 pb-0">
               <h5 className="mb-0">Engagement Metrics</h5>
@@ -209,7 +247,7 @@ const PostDetail = () => {
               </Row>
             </Card.Body>
           </Card>
-          
+
           {post.reports && post.reports.length > 0 && (
             <Card className="border-0 shadow-sm mb-4 border-danger">
               <Card.Header className="bg-danger bg-opacity-10 border-0 pt-4 pb-3">
@@ -247,8 +285,8 @@ const PostDetail = () => {
       </div>
 
       {/* Delete confirmation modal */}
-      <Modal 
-        show={showDeleteModal} 
+      <Modal
+        show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
         backdrop="static"
         keyboard={false}
