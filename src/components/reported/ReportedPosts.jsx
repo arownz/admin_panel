@@ -86,9 +86,13 @@ const ReportedPosts = () => {
     // Apply search term
     if (searchTerm) {
       results = results.filter(report =>
+        (report.content?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (report.post?.content?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (report.authorName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (report.post?.authorName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (report.reportedBy?.toLowerCase().includes(searchTerm.toLowerCase()))
+        (report.reportedBy?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (report.reason?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (report.id?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       console.log(`After search filter (${searchTerm}):`, results.length);
     }
@@ -225,7 +229,6 @@ const ReportedPosts = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <i className="bi bi-flag fs-2 text-primary me-2"></i>
             <h1 className="mb-0">Reported Posts</h1>
           </div>
 
@@ -289,80 +292,125 @@ const ReportedPosts = () => {
                 </div>
               </div>
             ) : (
-              <div className="table-responsive">
-                <table className="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Reported Content</th>
-                      <th>Author</th>
-                      <th>Reported By</th>
-                      <th>Reason</th>
-                      <th>Status</th>
-                      <th>Reported At</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredReports.map(report => (
-                      <tr key={report.id} className={report.status !== 'pending' ? 'table-secondary' : ''}>
-                        <td>{report.id}</td>
-                        <td>
-                          {report.post?.content
-                            ? (report.post.content.length > 50
-                              ? report.post.content.substring(0, 50) + '...'
-                              : report.post.content)
-                            : 'Content not available'}
-                        </td>
-                        <td>{report.post?.authorName || 'Unknown'}</td>
-                        <td>{report.reportedBy}</td>
-                        <td>
-                          <span className="badge bg-warning">{report.reason?.toUpperCase()}</span>
-                        </td>
-                        <td>
-                          {report.status === 'pending' && <span className="badge bg-warning">PENDING</span>}
-                          {report.status === 'rejected' && <span className="badge bg-secondary">DISMISSED</span>}
-                          {report.status === 'deleted' && <span className="badge bg-danger">REMOVED</span>}
-                        </td>
-                        <td>{formatDate(report.reportedAt)}</td>
-                        <td>
-                          <div className="btn-group">
-                            <Link to={`/reported-posts/${report.id}`} className="btn btn-sm btn-info">
-                              <i className="bi bi-eye"></i>
-                            </Link>
-                            {report.status === 'pending' && (
-                              <>
-                                <button
-                                  className="btn btn-sm btn-secondary"
-                                  onClick={() => handleActionClick(report, 'dismiss')}
-                                  title="Dismiss Report"
-                                >
-                                  <i className="bi bi-check-lg"></i>
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-danger"
-                                  onClick={() => handleActionClick(report, 'remove')}
-                                  title="Remove Post"
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
+              <>
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Reported Content</th>
+                        <th>Author</th>
+                        <th>Reported By</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Reported At</th>
+                        <th>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredReports.map(report => (
+                        <tr key={report.id} className={report.status !== 'pending' ? 'table-secondary' : ''}>
+                          <td>{report.id}</td>
+                          <td>
+                            {report.content
+                              ? (report.content.length > 50
+                                ? report.content.substring(0, 50) + '...'
+                                : report.content)
+                              : (report.post?.content
+                                ? (report.post.content.length > 50
+                                  ? report.post.content.substring(0, 50) + '...'
+                                  : report.post.content)
+                                : 'Content not available')}
+                          </td>
+                          <td>{report.authorName || report.post?.authorName || 'Unknown'}</td>
+                          <td>{report.reportedBy}</td>
+                          <td>
+                            <span className="badge bg-warning">
+                              <i className="bi bi-flag me-1"></i>
+                              {report.reason?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td>
+                            {report.status === 'pending' && (
+                              <span className="badge bg-warning">
+                                <i className="bi bi-clock me-1"></i>
+                                PENDING
+                              </span>
+                            )}
+                            {report.status === 'rejected' && (
+                              <span className="badge bg-secondary">
+                                <i className="bi bi-x-circle me-1"></i>
+                                DISMISSED
+                              </span>
+                            )}
+                            {report.status === 'deleted' && (
+                              <span className="badge bg-danger">
+                                <i className="bi bi-trash me-1"></i>
+                                REMOVED
+                              </span>
+                            )}
+                          </td>
+                          <td>{formatDate(report.reportedAt)}</td>
+                          <td>
+                            <div className="btn-group">
+                              <Link to={`/reported-posts/${report.id}`} className="btn btn-sm btn-info">
+                                <i className="bi bi-eye"></i>
+                              </Link>
+                              {report.status === 'pending' && (
+                                <>
+                                  <button
+                                    className="btn btn-sm btn-secondary"
+                                    onClick={() => handleActionClick(report, 'dismiss')}
+                                    title="Dismiss Report"
+                                  >
+                                    <i className="bi bi-check-lg"></i>
+                                  </button>
+                                  <button
+                                    className="btn btn-sm btn-danger"
+                                    onClick={() => handleActionClick(report, 'remove')}
+                                    title="Remove Post"
+                                  >
+                                    <i className="bi bi-trash"></i>
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                  <small className="text-muted">
+                    Showing {filteredReports.length} of {reportedPosts.length} reported posts
+                  </small>
+                  <div className="d-flex gap-3">
+                    <small className="text-muted">
+                      <Badge bg="warning" className="me-1">{reportedPosts.filter(r => r.status === 'pending').length}</Badge>
+                      Pending
+                    </small>
+                    <small className="text-muted">
+                      <Badge bg="secondary" className="me-1">{reportedPosts.filter(r => r.status === 'reviewed').length}</Badge>
+                      Reviewed
+                    </small>
+                    <small className="text-muted">
+                      <Badge bg="danger" className="me-1">{reportedPosts.filter(r => r.status === 'deleted').length}</Badge>
+                      Removed
+                    </small>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Confirmation modal */}
             <Modal
               show={showConfirmAction}
               onHide={cancelAction}
-              style={{ zIndex: 1060 }}
-              backdrop="static" // This forces the user to interact with the modal
+              backdrop="static"
+              keyboard={false}
+              centered
             >
               <Modal.Header closeButton>
                 <Modal.Title>

@@ -155,13 +155,26 @@ const UserDetail = () => {
           <Card className="full-width-card border-0 shadow-sm mb-4">
             <Card.Body className="p-5">
               <div className="text-center mb-5">
-                {user.profile_image_url ? (
-                  <img
-                    src={user.profile_image_url}
-                    alt={user.name}
-                    className="rounded-circle mb-4"
-                    style={{ width: '120px', height: '120px', objectFit: 'cover' }}
-                  />
+                {(user.profile_image_url || user.photoUrl) ? (
+                  <>
+                    <img
+                      src={user.profile_image_url || user.photoUrl}
+                      alt={user.name}
+                      className="rounded-circle mb-4"
+                      style={{ width: '120px', height: '120px', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const fallback = e.target.nextElementSibling;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div
+                      className="rounded-circle bg-secondary bg-opacity-25 align-items-center justify-content-center mx-auto mb-4"
+                      style={{ width: '120px', height: '120px', display: 'none' }}
+                    >
+                      <i className="bi bi-person display-4 text-secondary"></i>
+                    </div>
+                  </>
                 ) : (
                   <div
                     className="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-4"

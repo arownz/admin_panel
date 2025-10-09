@@ -27,6 +27,8 @@ const AdminCodes = () => {
         isOneTime: true
     });
     const [generatedCode, setGeneratedCode] = useState(null);
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+    const [codeToDelete, setCodeToDelete] = useState(null);
 
     useEffect(() => {
         fetchAdminCodes();
@@ -71,10 +73,11 @@ const AdminCodes = () => {
             });
         }
 
-        // Search filter
+        // Search filter - search by code value and UID
         if (searchTerm) {
             filtered = filtered.filter(code =>
-                code.code?.toLowerCase().includes(searchTerm.toLowerCase())
+                code.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                code.id?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -125,19 +128,39 @@ const AdminCodes = () => {
         }
     };
 
-    const handleDeleteCode = async (codeId) => {
-        if (!window.confirm('Are you sure you want to delete this admin code?')) {
+    const handleDeleteClick = (code) => {
+        setCodeToDelete(code);
+        setShowConfirmDelete(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!codeToDelete || !codeToDelete.id) {
+            console.error("No code selected for deletion");
+            setError("Failed to delete code: No code selected");
+            setShowConfirmDelete(false);
+            setCodeToDelete(null);
             return;
         }
 
+        console.log("Attempting to delete code:", codeToDelete.id);
+
         try {
-            await deleteAdminCode(codeId);
+            await deleteAdminCode(codeToDelete.id);
+            console.log("Code successfully deleted:", codeToDelete.id);
             setSuccess('Admin code deleted successfully');
             fetchAdminCodes();
         } catch (err) {
-            console.error('Error deleting code:', err);
-            setError('Failed to delete admin code');
+            console.error("Error deleting code:", err);
+            setError(`Failed to delete admin code: ${err.message || "Unknown error"}`);
+        } finally {
+            setShowConfirmDelete(false);
+            setCodeToDelete(null);
         }
+    };
+
+    const cancelDelete = () => {
+        setShowConfirmDelete(false);
+        setCodeToDelete(null);
     };
 
     const handleCleanupExpired = async () => {
@@ -161,11 +184,26 @@ const AdminCodes = () => {
         const expiresAt = new Date(code.expiresAt);
 
         if (code.isUsed) {
-            return <Badge bg="secondary">USED</Badge>;
+            return (
+                <Badge bg="secondary">
+                    <i className="bi bi-check-circle me-1"></i>
+                    USED
+                </Badge>
+            );
         } else if (now > expiresAt) {
-            return <Badge bg="danger">EXPIRED</Badge>;
+            return (
+                <Badge bg="danger">
+                    <i className="bi bi-x-circle me-1"></i>
+                    EXPIRED
+                </Badge>
+            );
         } else {
-            return <Badge bg="success">ACTIVE</Badge>;
+            return (
+                <Badge bg="success">
+                    <i className="bi bi-check-circle me-1"></i>
+                    ACTIVE
+                </Badge>
+            );
         }
     };
 
@@ -195,7 +233,6 @@ const AdminCodes = () => {
             <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
                 <Container fluid className="py-3">
                     <div className="d-flex align-items-center mb-4">
-                        <i className="bi bi-key fs-2 text-primary me-2"></i>
                         <h1 className="mb-0">Admin Code Management</h1>
                     </div>
 
@@ -290,102 +327,140 @@ const AdminCodes = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="table-responsive">
-                                    <Table hover className="mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Code</th>
-                                                <th>Status</th>
-                                                <th>Type</th>
-                                                <th>Generated</th>
-                                                <th>Expires</th>
-                                                <th>Time Remaining</th>
-                                                <th>Used</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filteredCodes.length === 0 ? (
+                                <>
+                                    <div className="table-responsive">
+                                        <Table hover className="mb-0">
+                                            <thead>
                                                 <tr>
-                                                    <td colSpan="8" className="text-center py-5">
-                                                        <div>
-                                                            <i className="bi bi-key display-4 text-muted mb-3"></i>
-                                                            <div className="text-muted">
-                                                                {codes.length === 0 ? 'No admin codes found' : 'No codes match the current filters'}
-                                                            </div>
-                                                        </div>
-                                                    </td>
+                                                    <th>Code</th>
+                                                    <th>Status</th>
+                                                    <th>Type</th>
+                                                    <th>Generated</th>
+                                                    <th>Expires</th>
+                                                    <th>Time Remaining</th>
+                                                    <th>Used</th>
+                                                    <th>Actions</th>
                                                 </tr>
-                                            ) : (
-                                                filteredCodes.map((code) => (
-                                                    <tr key={code.id}>
-                                                        <td>
-                                                            <div className="d-flex align-items-center">
-                                                                <code className="me-2">{code.code}</code>
-                                                                <Button
-                                                                    variant="outline-secondary"
-                                                                    size="sm"
-                                                                    onClick={() => copyToClipboard(code.code)}
-                                                                    title="Copy to clipboard"
-                                                                >
-                                                                    <i className="bi bi-clipboard"></i>
-                                                                </Button>
+                                            </thead>
+                                            <tbody>
+                                                {filteredCodes.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="8" className="text-center py-5">
+                                                            <div>
+                                                                <i className="bi bi-key display-4 text-muted mb-3"></i>
+                                                                <div className="text-muted">
+                                                                    {codes.length === 0 ? 'No admin codes found' : 'No codes match the current filters'}
+                                                                </div>
                                                             </div>
-                                                        </td>
-                                                        <td>{getStatusBadge(code)}</td>
-                                                        <td>
-                                                            <Badge bg={code.isOneTime ? 'info' : 'warning'}>
-                                                                {code.isOneTime ? 'ONE-TIME' : 'REUSABLE'}
-                                                            </Badge>
-                                                        </td>
-                                                        <td>
-                                                            <small className="text-muted">
-                                                                {code.generatedAt ?
-                                                                    new Date(code.generatedAt).toLocaleDateString() :
-                                                                    'Unknown'
-                                                                }
-                                                            </small>
-                                                        </td>
-                                                        <td>
-                                                            <small className="text-muted">
-                                                                {code.expiresAt ?
-                                                                    new Date(code.expiresAt).toLocaleDateString() :
-                                                                    'Never'
-                                                                }
-                                                            </small>
-                                                        </td>
-                                                        <td>
-                                                            <small className="text-muted">
-                                                                {code.expiresAt ? formatTimeRemaining(code.expiresAt) : 'Never'}
-                                                            </small>
-                                                        </td>
-                                                        <td>
-                                                            {code.isUsed ? (
-                                                                <small className="text-muted">
-                                                                    {code.usedAt ?
-                                                                        convertTimestamp(code.usedAt)?.toLocaleDateString() || 'Yes' :
-                                                                        'Yes'
-                                                                    }
-                                                                </small>
-                                                            ) : (
-                                                                <span className="text-muted">No</span>
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            <Button
-                                                                variant="outline-danger"
-                                                                size="sm"
-                                                                onClick={() => handleDeleteCode(code.id)}
-                                                            >
-                                                                <i className="bi bi-trash"></i>
-                                                            </Button>
                                                         </td>
                                                     </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </Table>
-                                </div>
+                                                ) : (
+                                                    filteredCodes.map((code) => (
+                                                        <tr key={code.id}>
+                                                            <td>
+                                                                <div className="d-flex align-items-center">
+                                                                    <code className="me-2">{code.code}</code>
+                                                                    <Button
+                                                                        variant="outline-secondary"
+                                                                        size="sm"
+                                                                        onClick={() => copyToClipboard(code.code)}
+                                                                        title="Copy to clipboard"
+                                                                    >
+                                                                        <i className="bi bi-clipboard"></i>
+                                                                    </Button>
+                                                                </div>
+                                                            </td>
+                                                            <td>{getStatusBadge(code)}</td>
+                                                            <td>
+                                                                <Badge bg={code.isOneTime ? 'info' : 'warning'}>
+                                                                    <i className={`bi ${code.isOneTime ? 'bi-1-circle' : 'bi-arrow-repeat'} me-1`}></i>
+                                                                    {code.isOneTime ? 'ONE-TIME' : 'REUSABLE'}
+                                                                </Badge>
+                                                            </td>
+                                                            <td>
+                                                                <small className="text-muted">
+                                                                    {code.generatedAt ?
+                                                                        new Date(code.generatedAt).toLocaleDateString() :
+                                                                        'Unknown'
+                                                                    }
+                                                                </small>
+                                                            </td>
+                                                            <td>
+                                                                <small className="text-muted">
+                                                                    {code.expiresAt ?
+                                                                        new Date(code.expiresAt).toLocaleDateString() :
+                                                                        'Never'
+                                                                    }
+                                                                </small>
+                                                            </td>
+                                                            <td>
+                                                                <small className="text-muted">
+                                                                    {code.expiresAt ? formatTimeRemaining(code.expiresAt) : 'Never'}
+                                                                </small>
+                                                            </td>
+                                                            <td>
+                                                                {code.isOneTime ? (
+                                                                    // One-time code: show if used
+                                                                    code.isUsed ? (
+                                                                        <small className="text-muted">
+                                                                            {code.usedAt ?
+                                                                                convertTimestamp(code.usedAt)?.toLocaleDateString() || 'Yes' :
+                                                                                'Yes'
+                                                                            }
+                                                                        </small>
+                                                                    ) : (
+                                                                        <span className="text-muted">No</span>
+                                                                    )
+                                                                ) : (
+                                                                    // Reusable code: show use count and last used
+                                                                    code.useCount > 0 ? (
+                                                                        <small className="text-muted">
+                                                                            {code.useCount}x
+                                                                            {code.lastUsedAt && (
+                                                                                <> ({convertTimestamp(code.lastUsedAt)?.toLocaleDateString()})</>
+                                                                            )}
+                                                                        </small>
+                                                                    ) : (
+                                                                        <span className="text-muted">No</span>
+                                                                    )
+                                                                )}
+                                                            </td>
+                                                            <td>
+                                                                <Button
+                                                                    variant="outline-danger"
+                                                                    size="sm"
+                                                                    onClick={() => handleDeleteClick(code)}
+                                                                >
+                                                                    <i className="bi bi-trash"></i>
+                                                                </Button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </Table>
+                                    </div>
+
+                                    <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                        <small className="text-muted">
+                                            Showing {filteredCodes.length} of {codes.length} admin codes
+                                        </small>
+                                        <div className="d-flex gap-3">
+                                            <small className="text-muted">
+                                                <Badge bg="success" className="me-1">{codes.filter(c => !c.isUsed && new Date(c.expiresAt) > new Date()).length}</Badge>
+                                                Active
+                                            </small>
+                                            <small className="text-muted">
+                                                <Badge bg="warning" className="me-1">{codes.filter(c => c.isUsed && c.isOneTime).length}</Badge>
+                                                Used
+                                            </small>
+                                            <small className="text-muted">
+                                                <Badge bg="danger" className="me-1">{codes.filter(c => !c.isUsed && new Date(c.expiresAt) <= new Date()).length}</Badge>
+                                                Expired
+                                            </small>
+                                        </div>
+                                    </div>
+                                </>
                             )}
                         </Card.Body>
                     </Card>
@@ -472,6 +547,38 @@ const AdminCodes = () => {
                                 Generate Code
                             </>
                         )}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Delete confirmation modal */}
+            <Modal
+                show={showConfirmDelete}
+                onHide={cancelDelete}
+                backdrop="static"
+                keyboard={false}
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Delete</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Are you sure you want to delete this admin code?</p>
+                    <div className="alert alert-secondary">
+                        <code className="fs-5">{codeToDelete?.code}</code>
+                        <br />
+                        <small className="text-muted">
+                            Type: {codeToDelete?.isOneTime ? 'One-time' : 'Reusable'}
+                        </small>
+                    </div>
+                    <p className="text-danger">This action cannot be undone.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={cancelDelete}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={confirmDelete}>
+                        Delete Code
                     </Button>
                 </Modal.Footer>
             </Modal>

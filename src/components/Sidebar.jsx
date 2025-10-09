@@ -68,7 +68,12 @@ const Sidebar = () => {
           <div className="d-flex align-items-center justify-content-between">
             {(!isCollapsed || isMobile) && (
               <div className="d-flex align-items-center text-white">
-                <i className="bi bi-gear-wide-connected fs-3 text-primary me-2"></i>
+                <img
+                  src="/logo.png"
+                  alt="TeamLexia Logo"
+                  className="sidebar-logo me-2"
+                  style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+                />
                 <div>
                   <h5 className="mb-0">TeamLexia</h5>
                   <small className="text-light opacity-75">Admin Panel</small>
@@ -76,13 +81,27 @@ const Sidebar = () => {
               </div>
             )}
             {isCollapsed && !isMobile && (
-              <i className="bi bi-gear-wide-connected fs-3 text-primary"></i>
+              <img
+                src="/logo.png"
+                alt="TeamLexia Logo"
+                className="sidebar-logo-collapsed mx-auto"
+                style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+              />
             )}
             {!isMobile && (
               <button
-                className="btn btn-link text-white p-1"
+                className="btn btn-link text-white p-0 sidebar-toggle-btn"
                 onClick={toggleSidebar}
-                style={{ fontSize: '1.2rem' }}
+                style={{
+                  fontSize: '1.2rem',
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}
+                title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
                 <i className={`bi ${isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'}`}></i>
               </button>

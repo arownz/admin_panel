@@ -77,6 +77,18 @@ h1, h2, h3, h4, h5, h6 {
   width: 70px;
 }
 
+/* Collapsed sidebar header layout */
+.sidebar.collapsed .sidebar-header > div {
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px;
+}
+
+.sidebar.collapsed .sidebar-toggle-btn {
+  position: static !important;
+  margin: 0 !important;
+}
+
 .sidebar-header {
   flex-shrink: 0;
   background-color: #151824;
@@ -798,3 +810,1411 @@ h1, h2, h3, h4, h5, h6 {
     display: none !important;
   }
 }
+
+/* ========================================
+   ENHANCED MOBILE-FIRST RESPONSIVE DESIGN
+   ======================================== */
+
+/* Base Mobile Styles (320px+) */
+@media (max-width: 575px) {
+  /* Container spacing */
+  .container-fluid {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  
+  /* Login page mobile optimization */
+  .login-container {
+    padding: 15px;
+  }
+  
+  .login-form {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 16px;
+  }
+  
+  .login-form .card-body {
+    padding: 1.5rem !important;
+  }
+  
+  .login-logo img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .login-form h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .login-form p {
+    font-size: 0.875rem !important;
+  }
+  
+  .login-form .alert {
+    font-size: 0.8125rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  .login-form .form-control {
+    font-size: 0.9375rem !important;
+    padding: 0.75rem !important;
+  }
+  
+  .login-form .btn-lg {
+    font-size: 0.9375rem !important;
+    padding: 0.75rem 1rem !important;
+  }
+  
+  /* Typography - Mobile scale */
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  h2 {
+    font-size: 1.35rem !important;
+  }
+  
+  h3 {
+    font-size: 1.2rem !important;
+  }
+  
+  h4 {
+    font-size: 1.1rem !important;
+  }
+  
+  h5 {
+    font-size: 1rem !important;
+  }
+  
+  /* Page headers */
+  .main-content h1 {
+    font-size: 1.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .main-content h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Icon sizes next to headings */
+  .main-content h1 i,
+  .main-content .fs-2 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Data table headers */
+  .data-table-header h2 {
+    font-size: 1.15rem !important;
+  }
+  
+  /* Tables - Mobile scroll */
+  .table-responsive {
+    margin: 0 -12px;
+    padding: 0 12px;
+    overflow-x: auto;
+  }
+  
+  .table {
+    font-size: 0.8125rem;
+    min-width: 600px;
+  }
+  
+  .table thead th {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.35rem;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+  }
+  
+  .table tbody td {
+    padding: 0.5rem 0.35rem;
+    white-space: nowrap;
+  }
+  
+  /* Reduce badge sizes */
+  .badge {
+    font-size: 0.65rem !important;
+    padding: 0.25em 0.5em !important;
+  }
+  
+  .badge i {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Button sizes */
+  .btn {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .btn-lg {
+    font-size: 0.9375rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Button groups - stack or wrap */
+  .btn-group {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .btn-group .btn {
+    margin-right: 0 !important;
+  }
+  
+  /* Action buttons in tables */
+  .table .btn-group {
+    display: flex;
+    gap: 0.25rem;
+  }
+  
+  /* Forms */
+  .form-control,
+  .form-select {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.375rem;
+  }
+  
+  /* Filter sections - stack vertically */
+  .data-table-header .d-flex {
+    flex-direction: column !important;
+    gap: 0.5rem;
+  }
+  
+  .data-table-header .d-flex > * {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .data-table-header .me-2,
+  .data-table-header .ms-2 {
+    margin: 0 !important;
+  }
+  
+  .data-table-header .form-select,
+  .data-table-header .form-control,
+  .data-table-header .search-bar {
+    width: 100% !important;
+  }
+  
+  /* Cards */
+  .card {
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem !important;
+  }
+  
+  .card-header {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9375rem;
+  }
+  
+  /* Stats cards on dashboard */
+  .stat-card {
+    margin-bottom: 1rem;
+    height: auto !important;
+    min-height: 100px;
+  }
+  
+  .stat-icon {
+    width: 48px !important;
+    height: 48px !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .stat-icon i {
+    font-size: 1.25rem !important;
+  }
+  
+  .stat-card h3 {
+    font-size: 1.5rem !important;
+  }
+  
+  .stat-card p {
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Charts */
+  .chart-container {
+    height: 200px !important;
+    padding: 1rem !important;
+  }
+  
+  .chart-container canvas {
+    max-height: 180px !important;
+  }
+  
+  /* Modals */
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .modal-content {
+    border-radius: 12px;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    padding: 0.75rem 1rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem;
+  }
+  
+  /* Alerts */
+  .alert {
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+  }
+  
+  /* Sidebar mobile */
+  .sidebar {
+    width: 280px;
+    max-width: 85vw;
+  }
+  
+  .sidebar-header {
+    padding: 1rem !important;
+  }
+  
+  .sidebar-header h5 {
+    font-size: 1.1rem !important;
+  }
+  
+  .sidebar .nav-link {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9375rem;
+  }
+  
+  .sidebar .nav-link i {
+    font-size: 1.1rem !important;
+  }
+  
+  /* Mobile menu toggle */
+  .mobile-menu-toggle {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  
+  .mobile-menu-toggle i {
+    font-size: 1.5rem;
+  }
+  
+  /* Detail pages - stack columns */
+  .row.mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .row.mb-3 .col-sm-4,
+  .row.mb-3 .col-sm-8 {
+    padding: 0.25rem 0.75rem;
+  }
+  
+  .row.mb-3 .col-sm-4 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .row.mb-3 .col-sm-8 {
+    font-size: 0.875rem;
+  }
+  
+  /* Breadcrumbs */
+  .breadcrumb {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Pagination */
+  .pagination {
+    font-size: 0.875rem;
+  }
+  
+  .page-link {
+    padding: 0.375rem 0.625rem;
+  }
+  
+  /* Search bars */
+  .search-bar input {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Input groups */
+  .input-group-text {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Dropdown menus */
+  .dropdown-menu {
+    font-size: 0.875rem;
+  }
+  
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Large phones / Small tablets (576px - 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+  .login-form {
+    max-width: 480px;
+  }
+  
+  .login-logo img {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  
+  .login-form h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .table {
+    font-size: 0.875rem;
+  }
+  
+  .btn {
+    font-size: 0.875rem;
+  }
+  
+  .sidebar {
+    width: 280px;
+  }
+}
+
+/* Tablets (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .login-form {
+    max-width: 500px;
+  }
+  
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  h2 {
+    font-size: 1.65rem !important;
+  }
+  
+  /* Tables still need some care */
+  .table {
+    font-size: 0.9375rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.625rem 0.5rem;
+  }
+  
+  /* Stat cards - 2 columns */
+  .stat-card {
+    height: 110px;
+  }
+  
+  /* Sidebar still off-canvas */
+  .sidebar {
+    width: 280px;
+  }
+  
+  .mobile-menu-toggle {
+    display: block !important;
+  }
+}
+
+/* Small laptops (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+  /* Collapsed sidebar by default for space */
+  .main-content {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+  }
+  
+  .main-content.sidebar-collapsed {
+    margin-left: 70px;
+    width: calc(100% - 70px);
+  }
+  
+  /* Slightly smaller stats */
+  .stat-card {
+    height: 115px;
+  }
+  
+  .stat-icon {
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
+/* Desktops (1200px+) */
+@media (min-width: 1200px) {
+  body {
+    font-size: 16px;
+  }
+  
+  .main-content {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+  }
+  
+  .main-content.sidebar-collapsed {
+    margin-left: 70px;
+    width: calc(100% - 70px);
+  }
+  
+  /* Full spacing and sizes */
+  .stat-card {
+    height: 120px;
+  }
+  
+  .table {
+    font-size: 1rem;
+  }
+  
+  .btn {
+    font-size: 0.9375rem;
+  }
+}
+
+/* Large desktops (1400px+) */
+@media (min-width: 1400px) {
+  .container-fluid {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+}
+
+/* Ultra-wide screens (1920px+) */
+@media (min-width: 1920px) {
+  .container-fluid {
+    max-width: 1800px;
+  }
+  
+  .login-form {
+    max-width: 550px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .nav-link {
+    min-height: 48px;
+  }
+  
+  .form-control,
+  .form-select {
+    min-height: 44px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .card:hover {
+    transform: none;
+  }
+  
+  .btn:hover {
+    transform: none;
+  }
+  
+  .stat-card:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .sidebar,
+  .mobile-menu-toggle,
+  .sidebar-overlay,
+  .btn,
+  .modal {
+    display: none !important;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #dee2e6 !important;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border: 2px solid currentColor !important;
+  }
+  
+  .btn {
+    border: 2px solid currentColor;
+  }
+  
+  .sidebar {
+    border-right: 3px solid currentColor;
+  }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  /* Placeholder for future dark mode implementation */
+  /* Currently using admin panel's light theme only */
+}
+
+/* ========================================
+   COMPONENT-SPECIFIC RESPONSIVE STYLES
+   ======================================== */
+
+/* Dashboard Responsive Enhancements */
+@media (max-width: 767px) {
+  /* Stack dashboard stats vertically on mobile */
+  .stat-card .stat-icon {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.25rem !important;
+  }
+  
+  .stat-value {
+    font-size: 1.75rem !important;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem !important;
+  }
+  
+  /* Chart containers */
+  .chart-container,
+  canvas {
+    max-height: 200px !important;
+  }
+  
+  /* Dashboard cards spacing */
+  .dashboard .row {
+    margin-left: -8px;
+    margin-right: -8px;
+  }
+  
+  .dashboard .row > [class*='col-'] {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+/* User Management & Detail Pages */
+@media (max-width: 767px) {
+  /* User profile image on detail page */
+  .user-profile-image {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  /* Detail page two-column layout becomes single column */
+  .detail-two-column {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  /* User table on mobile - hide less important columns */
+  .users-table th:nth-child(3),
+  .users-table td:nth-child(3) {
+    display: none;
+  }
+  
+  /* Action buttons in tables */
+  .table .btn-group {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
+  
+  .table .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Posts & Reported Posts Pages */
+@media (max-width: 767px) {
+  /* Post content truncation */
+  .post-content {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Hide engagement stats column on small screens */
+  .posts-table th:last-child,
+  .posts-table td:last-child {
+    display: none;
+  }
+}
+
+/* Appointments Page */
+@media (max-width: 767px) {
+  /* Appointment cards stack vertically */
+  .appointment-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Hide professional column on mobile */
+  .appointments-table th:nth-child(2),
+  .appointments-table td:nth-child(2) {
+    display: none;
+  }
+}
+
+/* Verification Requests Page */
+@media (max-width: 767px) {
+  /* Documents preview */
+  .document-preview img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Hide affiliation column */
+  .verification-table th:nth-child(3),
+  .verification-table td:nth-child(3) {
+    display: none;
+  }
+}
+
+/* Admin Codes Page */
+@media (max-width: 767px) {
+  /* Code display */
+  .admin-code {
+    font-size: 0.875rem;
+  }
+  
+  /* Hide time remaining column */
+  .admin-codes-table th:nth-child(6),
+  .admin-codes-table td:nth-child(6) {
+    display: none;
+  }
+  
+  /* Copy button */
+  .copy-button {
+    padding: 4px 6px;
+  }
+}
+
+/* Filter Sections - All Pages */
+@media (max-width: 767px) {
+  /* Stack filters vertically */
+  .filters-section {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  
+  .filters-section .form-select,
+  .filters-section .form-control {
+    width: 100% !important;
+  }
+  
+  /* Search input full width */
+  .search-input {
+    width: 100% !important;
+  }
+  
+  /* Filter labels */
+  .filter-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Modals - All Pages */
+@media (max-width: 767px) {
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem !important;
+  }
+  
+  .modal-title {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Modal buttons stack vertically */
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+}
+
+/* Table Enhancements - All Pages */
+@media (max-width: 767px) {
+  /* Better table scrolling */
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+  
+  /* Table cell padding reduction */
+  .table > :not(caption) > * > * {
+    padding: 0.5rem 0.35rem;
+  }
+  
+  /* Table headers sticky on mobile */
+  .table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+  }
+  
+  /* Badge sizing */
+  .table .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+  }
+  
+  /* Link text in tables */
+  .table a {
+    font-size: 0.875rem;
+  }
+}
+
+/* Cards - All Pages */
+@media (max-width: 767px) {
+  .card {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+  }
+  
+  .card-header {
+    padding: 0.75rem !important;
+  }
+  
+  .card-body {
+    padding: 0.75rem !important;
+  }
+  
+  .card-title {
+    font-size: 1.125rem !important;
+  }
+  
+  /* Full width cards on mobile */
+  .full-width-card {
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 0;
+  }
+}
+
+/* Buttons - All Pages */
+@media (max-width: 767px) {
+  /* Action button groups */
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .action-buttons .btn {
+    flex: 1 1 auto;
+    min-width: 100px;
+  }
+  
+  /* Icon-only buttons on mobile */
+  .btn-icon-mobile {
+    padding: 0.5rem;
+    min-width: 36px;
+  }
+  
+  .btn-icon-mobile .btn-text {
+    display: none;
+  }
+}
+
+/* Alerts - All Pages */
+@media (max-width: 767px) {
+  .alert {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+  }
+  
+  .alert-heading {
+    font-size: 1rem;
+  }
+}
+
+/* Breadcrumbs & Navigation */
+@media (max-width: 767px) {
+  .breadcrumb {
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item::before {
+    padding: 0 0.25rem;
+  }
+}
+
+/* Form Elements - All Pages */
+@media (max-width: 767px) {
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  .form-control,
+  .form-select {
+    font-size: 0.9375rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Textarea height */
+  textarea.form-control {
+    min-height: 100px;
+  }
+  
+  /* Input group adjustments */
+  .input-group {
+    flex-wrap: nowrap;
+  }
+  
+  .input-group-text {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Pagination - All Pages */
+@media (max-width: 767px) {
+  .pagination {
+    font-size: 0.875rem;
+  }
+  
+  .page-link {
+    padding: 0.375rem 0.625rem;
+  }
+  
+  /* Show only prev/next and current page on mobile */
+  .pagination .page-item:not(.active):not(.disabled) {
+    display: none;
+  }
+  
+  .pagination .page-item.active,
+  .pagination .page-item:first-child,
+  .pagination .page-item:last-child {
+    display: block;
+  }
+}
+
+/* Spinners & Loading States */
+@media (max-width: 767px) {
+  .spinner-border {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .loading-text {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Touch-friendly Enhancements */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch targets to minimum 44x44px */
+  .btn,
+  .form-control,
+  .form-select,
+  a.nav-link,
+  button {
+    min-height: 44px;
+  }
+  
+  /* Remove hover states on touch devices */
+  .btn:hover,
+  .nav-link:hover,
+  .card:hover {
+    transform: none !important;
+  }
+  
+  /* Improve clickable areas */
+  .table tbody tr {
+    cursor: pointer;
+  }
+}
+
+/* ===== ENHANCED TABLE RESPONSIVE STYLES ===== */
+
+/* Base table styling - ensure all tables are properly contained */
+.table-responsive,
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Ensure tables don't break layout */
+.table {
+  min-width: 100%;
+  margin-bottom: 0;
+}
+
+/* Mobile-First Table Styles */
+@media (max-width: 991px) {
+  /* Reduce table padding for medium screens */
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    vertical-align: middle;
+  }
+  
+  /* Hide less important columns on tablets */
+  .table th:nth-child(n+5),
+  .table td:nth-child(n+5) {
+    display: none;
+  }
+  
+  /* Keep action columns visible */
+  .table th:last-child,
+  .table td:last-child {
+    display: table-cell !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Further reduce padding on mobile */
+  .table th,
+  .table td {
+    padding: 0.35rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+  
+  /* Make first column sticky on mobile for context */
+  .table thead th:first-child,
+  .table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 2;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .table thead th:first-child {
+    z-index: 3;
+  }
+  
+  /* Hide even more columns on mobile */
+  .table th:nth-child(n+4),
+  .table td:nth-child(n+4) {
+    display: none;
+  }
+  
+  /* Always show first, second, and last (actions) columns */
+  .table th:nth-child(1),
+  .table th:nth-child(2),
+  .table th:last-child,
+  .table td:nth-child(1),
+  .table td:nth-child(2),
+  .table td:last-child {
+    display: table-cell !important;
+  }
+  
+  /* Reduce badge sizes */
+  .badge {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  /* Stack action buttons on mobile */
+  .d-flex.gap-1 {
+    gap: 0.25rem !important;
+  }
+  
+  .d-flex.gap-1 .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Reduce button icon size */
+  .btn i {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 575px) {
+  /* Ultra-compact mobile view */
+  .table th,
+  .table td {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Only show name/id and actions on small mobile */
+  .table th:not(:first-child):not(:last-child),
+  .table td:not(:first-child):not(:last-child) {
+    display: none;
+  }
+  
+  .table th:first-child,
+  .table th:last-child,
+  .table td:first-child,
+  .table td:last-child {
+    display: table-cell !important;
+  }
+  
+  /* Make table scrollable horizontally with visible scrollbar */
+  .table-responsive,
+  .table-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    max-width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: #6c757d #e9ecef;
+  }
+  
+  .table-responsive::-webkit-scrollbar,
+  .table-container::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .table-responsive::-webkit-scrollbar-track,
+  .table-container::-webkit-scrollbar-track {
+    background: #e9ecef;
+    border-radius: 4px;
+  }
+  
+  .table-responsive::-webkit-scrollbar-thumb,
+  .table-container::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 4px;
+  }
+}
+
+/* Specific Page Overrides for Better Mobile Experience */
+
+/* User Management Table */
+@media (max-width: 767px) {
+  /* Show name/email, role, and actions on mobile */
+  .admin-container .users-page .table th:nth-child(3),
+  .admin-container .users-page .table td:nth-child(3),
+  .admin-container .users-page .table th:nth-child(4),
+  .admin-container .users-page .table td:nth-child(4),
+  .admin-container .users-page .table th:nth-child(5),
+  .admin-container .users-page .table td:nth-child(5) {
+    display: none !important;
+  }
+}
+
+/* Verification Requests Table */
+@media (max-width: 767px) {
+  /* Show name, profession, and actions */
+  .verification-page .table th:nth-child(n+4):not(:last-child),
+  .verification-page .table td:nth-child(n+4):not(:last-child) {
+    display: none !important;
+  }
+}
+
+/* Appointments Table */
+@media (max-width: 767px) {
+  /* Show user, date, and actions */
+  .appointments-page .table th:nth-child(3),
+  .appointments-page .table td:nth-child(3),
+  .appointments-page .table th:nth-child(4),
+  .appointments-page .table td:nth-child(4) {
+    display: none !important;
+  }
+}
+
+/* Posts Table */
+@media (max-width: 767px) {
+  /* Show content, author, and actions */
+  .posts-page .table th:nth-child(n+4):not(:last-child),
+  .posts-page .table td:nth-child(n+4):not(:last-child) {
+    display: none !important;
+  }
+  
+  /* Truncate long post content */
+  .posts-page .table td:nth-child(2) {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Reported Posts Table */
+@media (max-width: 767px) {
+  /* Show content, reporter, and actions */
+  .reported-posts-page .table th:nth-child(n+4):not(:last-child),
+  .reported-posts-page .table td:nth-child(n+4):not(:last-child) {
+    display: none !important;
+  }
+}
+
+/* Admin Codes Table */
+@media (max-width: 767px) {
+  /* Show code, status, type, and actions */
+  .admin-codes-page .table th:nth-child(n+5):not(:last-child),
+  .admin-codes-page .table td:nth-child(n+5):not(:last-child) {
+    display: none !important;
+  }
+}
+
+/* Dashboard Tables - Keep compact but readable */
+@media (max-width: 767px) {
+  .dashboard-overview .table th,
+  .dashboard-overview .table td {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+  }
+  
+  /* Hide less critical columns */
+  .dashboard-overview .table th:nth-child(3),
+  .dashboard-overview .table td:nth-child(3) {
+    display: none;
+  }
+}
+
+/* Detail Page Responsive Styles */
+@media (max-width: 767px) {
+  /* User Detail, Post Detail, Appointment Detail pages */
+  .detail-page .card {
+    margin-bottom: 1rem;
+  }
+  
+  .detail-page .card-body {
+    padding: 1rem;
+  }
+  
+  .detail-page .table th,
+  .detail-page .table td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Profile images on detail pages */
+  .detail-page .profile-image {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  /* Document previews on verification detail */
+  .detail-page .document-preview {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Action buttons on detail pages */
+  .detail-page .btn-group,
+  .detail-page .d-flex.gap-2 {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .detail-page .btn-group .btn,
+  .detail-page .d-flex.gap-2 .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Login Page Responsive */
+@media (max-width: 575px) {
+  .login-container {
+    padding: 1rem;
+  }
+  
+  .login-form {
+    padding: 1.5rem !important;
+  }
+  
+  .login-logo img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .login-form h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .login-form .btn-lg {
+    font-size: 1rem !important;
+    padding: 0.625rem !important;
+  }
+}
+
+/* Filter Sections - All Pages */
+@media (max-width: 767px) {
+  /* Stack filters vertically */
+  .d-flex.gap-2,
+  .d-flex.gap-3 {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .d-flex.gap-2 > *,
+  .d-flex.gap-3 > * {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Full-width form controls in filters */
+  .d-flex.gap-2 .form-control,
+  .d-flex.gap-2 .form-select,
+  .d-flex.gap-3 .form-control,
+  .d-flex.gap-3 .form-select {
+    width: 100% !important;
+  }
+  
+  /* Adjust filter container */
+  .bg-light.rounded {
+    padding: 1rem !important;
+  }
+  
+  .bg-light.rounded .row {
+    margin: 0 !important;
+  }
+  
+  .bg-light.rounded .col-md-3,
+  .bg-light.rounded .col-md-4,
+  .bg-light.rounded .col-md-6 {
+    padding: 0.25rem !important;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Ensure modals are responsive */
+@media (max-width: 767px) {
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem;
+    flex-direction: column;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+}
+
+/* Card responsive adjustments */
+@media (max-width: 767px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  .card-header {
+    padding: 0.75rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Stats cards on dashboard */
+@media (max-width: 767px) {
+  .stat-card {
+    margin-bottom: 1rem;
+  }
+  
+  .stat-icon {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.25rem !important;
+  }
+  
+  .stat-value {
+    font-size: 1.75rem !important;
+  }
+  
+  .stat-label {
+    font-size: 0.8125rem !important;
+  }
+}
+
+

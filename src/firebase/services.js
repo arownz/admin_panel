@@ -348,10 +348,38 @@ export const getReportedPosts = async () => {
   try {
     const reportsCollection = collection(db, 'reported_posts');
     const snapshot = await getDocs(reportsCollection);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    
+    // Fetch associated post data for each report
+    const reportsWithPosts = await Promise.all(
+      snapshot.docs.map(async (reportDoc) => {
+        const reportData = {
+          id: reportDoc.id,
+          ...reportDoc.data()
+        };
+        
+        // If the report contains a postId, fetch the associated post
+        if (reportData.postId) {
+          try {
+            const postRef = doc(db, 'posts', reportData.postId);
+            const postSnapshot = await getDoc(postRef);
+            
+            if (postSnapshot.exists()) {
+              reportData.post = {
+                id: postSnapshot.id,
+                ...postSnapshot.data()
+              };
+            }
+          } catch (postError) {
+            console.warn(`Could not fetch post ${reportData.postId}: ${postError.message}`);
+            // Continue without the post data if it's not available
+          }
+        }
+        
+        return reportData;
+      })
+    );
+    
+    return reportsWithPosts;
   } catch (error) {
     console.error('Error getting reported posts:', error);
     return [];
@@ -544,16 +572,17 @@ export const generateAdminCode = async (generatedBy, expiresInHours = 24, isOneT
 // Validate admin code
 export const validateAdminCode = async (code) => {
   try {
+    // First, search for the code without checking isUsed
+    // This allows reusable codes to work even after being used
     const q = query(
       collection(db, 'adminCodes'),
-      where('code', '==', code),
-      where('isUsed', '==', false)
+      where('code', '==', code)
     );
     
     const querySnapshot = await getDocs(q);
     
     if (querySnapshot.empty) {
-      return { valid: false, reason: 'Invalid or already used code' };
+      return { valid: false, reason: 'Invalid authentication code' };
     }
 
     const codeDoc = querySnapshot.docs[0];
@@ -565,6 +594,11 @@ export const validateAdminCode = async (code) => {
     
     if (now > expiresAt) {
       return { valid: false, reason: 'Code has expired' };
+    }
+
+    // Check if one-time code has already been used
+    if (codeData.isOneTime && codeData.isUsed) {
+      return { valid: false, reason: 'This one-time code has already been used' };
     }
 
     return { 
@@ -585,11 +619,31 @@ export const validateAdminCode = async (code) => {
 export const markCodeAsUsed = async (codeId, usedBy = 'admin') => {
   try {
     const codeRef = doc(db, 'adminCodes', codeId);
-    await updateDoc(codeRef, {
-      isUsed: true,
-      usedAt: serverTimestamp(),
-      usedBy
-    });
+    const codeDoc = await getDoc(codeRef);
+    
+    if (!codeDoc.exists()) {
+      throw new Error('Code not found');
+    }
+    
+    const codeData = codeDoc.data();
+    
+    // For one-time codes: mark as used and invalid
+    // For reusable codes: just update usedAt timestamp but keep isUsed = false
+    if (codeData.isOneTime) {
+      await updateDoc(codeRef, {
+        isUsed: true,
+        usedAt: serverTimestamp(),
+        usedBy
+      });
+    } else {
+      // For reusable codes, update lastUsedAt instead
+      await updateDoc(codeRef, {
+        lastUsedAt: serverTimestamp(),
+        lastUsedBy: usedBy,
+        useCount: (codeData.useCount || 0) + 1
+      });
+    }
+    
     return true;
   } catch (error) {
     console.error('Error marking code as used:', error);

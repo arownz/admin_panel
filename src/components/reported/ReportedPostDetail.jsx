@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Container, Card, Row, Col, Button, Alert, Badge, Form } from 'react-bootstrap';
+import { Container, Card, Row, Col, Button, Alert, Badge, Form, Modal } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
 import { getReportedPost, resolveReport, deletePost } from '../../firebase/services';
 
@@ -11,6 +11,7 @@ const ReportedPostDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resolutionNote, setResolutionNote] = useState('');
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   useEffect(() => {
     const fetchReportedPostData = async () => {
@@ -54,31 +55,89 @@ const ReportedPostDetail = () => {
     }
   };
 
+  const handleDeleteClick = () => {
+    setShowConfirmDelete(true);
+  };
+
+  const confirmDelete = async () => {
+    setShowConfirmDelete(false);
+    await handleResolveReport('delete');
+  };
+
+  const cancelDelete = () => {
+    setShowConfirmDelete(false);
+  };
+
   const getSeverityBadge = (severity) => {
     switch (severity) {
       case 'high':
-        return <Badge bg="danger">HIGH</Badge>;
+        return (
+          <Badge bg="danger">
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            HIGH
+          </Badge>
+        );
       case 'medium':
-        return <Badge bg="warning">MEDIUM</Badge>;
+        return (
+          <Badge bg="warning">
+            <i className="bi bi-exclamation-circle me-2"></i>
+            MEDIUM
+          </Badge>
+        );
       case 'low':
-        return <Badge bg="info">LOW</Badge>;
+        return (
+          <Badge bg="info">
+            <i className="bi bi-info-circle me-2"></i>
+            LOW
+          </Badge>
+        );
       default:
-        return <Badge bg="secondary">{severity?.toUpperCase() || 'UNKNOWN'}</Badge>;
+        return (
+          <Badge bg="secondary">
+            <i className="bi bi-dash-circle me-2"></i>
+            {severity?.toUpperCase() || 'UNKNOWN'}
+          </Badge>
+        );
     }
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
-        return <Badge bg="warning">PENDING REVIEW</Badge>;
+        return (
+          <Badge bg="warning">
+            <i className="bi bi-clock me-2"></i>
+            PENDING REVIEW
+          </Badge>
+        );
       case 'approved':
-        return <Badge bg="success">APPROVED</Badge>;
+        return (
+          <Badge bg="success">
+            <i className="bi bi-check-circle me-2"></i>
+            APPROVED
+          </Badge>
+        );
       case 'rejected':
-        return <Badge bg="danger">REJECTED</Badge>;
+        return (
+          <Badge bg="danger">
+            <i className="bi bi-x-circle me-2"></i>
+            REJECTED
+          </Badge>
+        );
       case 'resolved':
-        return <Badge bg="primary">RESOLVED</Badge>;
+        return (
+          <Badge bg="primary">
+            <i className="bi bi-check-circle me-2"></i>
+            RESOLVED
+          </Badge>
+        );
       default:
-        return <Badge bg="secondary">{status?.toUpperCase() || 'UNKNOWN'}</Badge>;
+        return (
+          <Badge bg="secondary">
+            <i className="bi bi-dash-circle me-2"></i>
+            {status?.toUpperCase() || 'UNKNOWN'}
+          </Badge>
+        );
     }
   };
 
@@ -262,11 +321,7 @@ const ReportedPostDetail = () => {
                 <div className="d-flex gap-2">
                   <Button
                     variant="danger"
-                    onClick={() => {
-                      if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
-                        handleResolveReport('delete');
-                      }
-                    }}
+                    onClick={handleDeleteClick}
                     disabled={loading}
                   >
                     <i className="bi bi-trash me-1"></i> Delete Post
@@ -276,6 +331,38 @@ const ReportedPostDetail = () => {
             </Card>
           )}
         </Container>
+
+        {/* Delete confirmation modal */}
+        <Modal
+          show={showConfirmDelete}
+          onHide={cancelDelete}
+          backdrop="static"
+          keyboard={false}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Delete</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to delete this reported post?</p>
+            <div className="alert alert-warning">
+              <p className="mb-1"><strong>Post Content:</strong></p>
+              <p className="mb-0">{reportedPost?.post?.content || 'Content not available'}</p>
+            </div>
+            <p className="text-danger mb-0">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              This action cannot be undone. The post will be permanently removed from the system.
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancelDelete}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={confirmDelete}>
+              Delete Post
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
   );

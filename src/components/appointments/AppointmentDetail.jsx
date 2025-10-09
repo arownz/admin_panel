@@ -30,18 +30,43 @@ const AppointmentDetail = () => {
     fetchAppointmentData();
   }, [id]);
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
       case 'completed':
-        return 'success';
+        return (
+          <Badge bg="success">
+            <i className="bi bi-check-circle me-2"></i>
+            {status.toUpperCase()}
+          </Badge>
+        );
       case 'cancelled':
-        return 'danger';
+        return (
+          <Badge bg="danger">
+            <i className="bi bi-x-circle me-2"></i>
+            {status.toUpperCase()}
+          </Badge>
+        );
       case 'scheduled':
-        return 'primary';
+        return (
+          <Badge bg="primary">
+            <i className="bi bi-calendar-check me-2"></i>
+            {status.toUpperCase()}
+          </Badge>
+        );
       case 'pending':
-        return 'warning';
+        return (
+          <Badge bg="warning">
+            <i className="bi bi-clock me-2"></i>
+            {status.toUpperCase()}
+          </Badge>
+        );
       default:
-        return 'secondary';
+        return (
+          <Badge bg="secondary">
+            <i className="bi bi-dash-circle me-2"></i>
+            {status.toUpperCase()}
+          </Badge>
+        );
     }
   };
 
@@ -116,9 +141,7 @@ const AppointmentDetail = () => {
               <Row className="mb-3">
                 <Col sm={4} className="text-muted">Status:</Col>
                 <Col sm={8}>
-                  <Badge bg={getStatusBadgeClass(appointment.status)}>
-                    {appointment.status?.toUpperCase() || 'UNKNOWN'}
-                  </Badge>
+                  {getStatusBadge(appointment.status)}
                 </Col>
               </Row>
               <Row className="mb-3">

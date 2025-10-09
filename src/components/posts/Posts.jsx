@@ -150,7 +150,6 @@ const Posts = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <i className="bi bi-file-post fs-2 text-primary me-2"></i>
             <h1 className="mb-0">Posts Management</h1>
           </div>
 
@@ -191,79 +190,101 @@ const Posts = () => {
                   </div>
                 </div>
               ) : (
-                <div className="table-responsive">
-                  <Table hover className="mb-0">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Title/Content</th>
-                        <th>Author</th>
-                        <th>Category</th>
-                        <th>Engagement</th>
-                        <th>Created At</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPosts.map(post => (
-                        <tr key={post.id}>
-                          <td>{post.id}</td>
-                          <td>
-                            <div className="fw-medium">
-                              {post.title ? post.title : truncateContent(post.content)}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              {post.authorPhotoUrl ? (
-                                <img
-                                  src={post.authorPhotoUrl}
-                                  alt={post.authorName}
-                                  className="rounded-circle me-2"
-                                  width="25"
-                                  height="25"
-                                />
-                              ) : null}
-                              <span>{post.authorName}</span>
-                              {post.isProfessionalPost && (
-                                <Badge bg="info" className="ms-1">Pro</Badge>
-                              )}
-                            </div>
-                          </td>
-                          <td>{post.category || 'Uncategorized'}</td>
-                          <td>
-                            <small className="text-muted">
-                              <i className="bi bi-heart me-1"></i>{post.likeCount || 0}
-                              <span className="mx-2">•</span>
-                              <i className="bi bi-chat me-1"></i>{post.commentCount || 0}
-                            </small>
-                          </td>
-                          <td>
-                            <small className="text-muted">
-                              {formatDate(post.createdAt)}
-                            </small>
-                          </td>
-                          <td>
-                            <div className="d-flex gap-1">
-                              <Link to={`/posts/${post.id}`}>
-                                <Button variant="outline-primary" size="sm">
-                                  <i className="bi bi-eye"></i>
-                                </Button>
-                              </Link>
-                              <Button
-                                variant="outline-danger"
-                                size="sm"
-                                onClick={() => handleDeleteClick(post)}
-                              >
-                                <i className="bi bi-trash"></i>
-                              </Button>
-                            </div>
-                          </td>
+                <>
+                  <div className="table-responsive">
+                    <Table hover className="mb-0">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Title/Content</th>
+                          <th>Author</th>
+                          <th>Category</th>
+                          <th>Engagement</th>
+                          <th>Created At</th>
+                          <th>Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {filteredPosts.map(post => (
+                          <tr key={post.id}>
+                            <td>{post.id}</td>
+                            <td>
+                              <div className="fw-medium">
+                                {post.title ? post.title : truncateContent(post.content)}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="d-flex align-items-center">
+                                {post.authorPhotoUrl ? (
+                                  <img
+                                    src={post.authorPhotoUrl}
+                                    alt={post.authorName}
+                                    className="rounded-circle me-2"
+                                    width="25"
+                                    height="25"
+                                  />
+                                ) : null}
+                                <span>{post.authorName}</span>
+                                {post.isProfessionalPost && (
+                                  <Badge bg="info" className="ms-1">Pro</Badge>
+                                )}
+                              </div>
+                            </td>
+                            <td>{post.category || 'Uncategorized'}</td>
+                            <td>
+                              <small className="text-muted">
+                                <i className="bi bi-heart me-1"></i>{post.likeCount || 0}
+                                <span className="mx-2">•</span>
+                                <i className="bi bi-chat me-1"></i>{post.commentCount || 0}
+                              </small>
+                            </td>
+                            <td>
+                              <small className="text-muted">
+                                {formatDate(post.createdAt)}
+                              </small>
+                            </td>
+                            <td>
+                              <div className="d-flex gap-1">
+                                <Link to={`/posts/${post.id}`}>
+                                  <Button variant="outline-primary" size="sm">
+                                    <i className="bi bi-eye"></i>
+                                  </Button>
+                                </Link>
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(post)}
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+
+                  <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <small className="text-muted">
+                      Showing {filteredPosts.length} of {posts.length} posts
+                    </small>
+                    <div className="d-flex gap-3">
+                      <small className="text-muted">
+                        <Badge bg="success" className="me-1">{posts.filter(p => p.status === 'active').length}</Badge>
+                        Active
+                      </small>
+                      <small className="text-muted">
+                        <Badge bg="secondary" className="me-1">{posts.filter(p => p.status === 'archived').length}</Badge>
+                        Archived
+                      </small>
+                      <small className="text-muted">
+                        <Badge bg="primary" className="me-1">{posts.reduce((sum, p) => sum + (p.likeCount || 0), 0)}</Badge>
+                        Total Likes
+                      </small>
+                    </div>
+                  </div>
+                </>
               )}
             </Card.Body>
           </Card>

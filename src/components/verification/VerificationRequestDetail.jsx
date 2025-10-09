@@ -13,6 +13,8 @@ const VerificationRequestDetail = () => {
   const [error, setError] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showConfirmAction, setShowConfirmAction] = useState(false);
+  const [actionType, setActionType] = useState('');
 
   const fetchVerificationRequest = useCallback(async () => {
     try {
@@ -52,6 +54,24 @@ const VerificationRequestDetail = () => {
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handleActionClick = (action) => {
+    setActionType(action);
+    setShowConfirmAction(true);
+  };
+
+  const confirmAction = async () => {
+    setShowConfirmAction(false);
+    if (actionType) {
+      await handleStatusUpdate(actionType);
+      setActionType('');
+    }
+  };
+
+  const cancelAction = () => {
+    setShowConfirmAction(false);
+    setActionType('');
   };
 
   const handleDelete = async () => {
@@ -136,7 +156,6 @@ const VerificationRequestDetail = () => {
                 Back to Verification Requests
               </Button>
               <h1 className="display-6 mb-0">
-                <i className="bi bi-patch-check me-3"></i>
                 Verification Request Details
               </h1>
             </div>
@@ -146,7 +165,7 @@ const VerificationRequestDetail = () => {
                   <Button
                     variant="success"
                     size="lg"
-                    onClick={() => handleStatusUpdate('approved')}
+                    onClick={() => handleActionClick('approved')}
                     disabled={processing}
                   >
                     {processing ? (
@@ -159,7 +178,7 @@ const VerificationRequestDetail = () => {
                   <Button
                     variant="danger"
                     size="lg"
-                    onClick={() => handleStatusUpdate('rejected')}
+                    onClick={() => handleActionClick('rejected')}
                     disabled={processing}
                   >
                     {processing ? (
@@ -365,6 +384,54 @@ const VerificationRequestDetail = () => {
                   <i className="bi bi-trash me-2"></i>
                 )}
                 Delete
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Approve/Reject Confirmation Modal */}
+          <Modal
+            show={showConfirmAction}
+            onHide={cancelAction}
+            backdrop="static"
+            keyboard={false}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {actionType === 'approved' ? 'Approve Verification Request' : 'Reject Verification Request'}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                Are you sure you want to {actionType === 'approved' ? 'approve' : 'reject'} this verification request?
+              </p>
+              {request && (
+                <div className="alert alert-info">
+                  <p className="mb-1"><strong>Professional:</strong> {request.userName || 'Unknown'}</p>
+                  <p className="mb-1"><strong>Profession:</strong> {request.profession}</p>
+                  <p className="mb-0"><strong>Work Email:</strong> {request.workEmail}</p>
+                </div>
+              )}
+              <p className="text-muted mb-0">
+                <i className="bi bi-info-circle me-2"></i>
+                {actionType === 'approved'
+                  ? 'This will grant the user professional verification status.'
+                  : 'This will reject the verification request. The user can resubmit later.'}
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={cancelAction}>
+                Cancel
+              </Button>
+              <Button
+                variant={actionType === 'approved' ? 'success' : 'danger'}
+                onClick={confirmAction}
+                disabled={processing}
+              >
+                {processing ? (
+                  <Spinner animation="border" size="sm" className="me-2" />
+                ) : null}
+                {actionType === 'approved' ? 'Approve' : 'Reject'}
               </Button>
             </Modal.Footer>
           </Modal>

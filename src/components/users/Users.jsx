@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Card, Table, Button, Form, Badge, Spinner, Alert } from 'react-bootstrap';
+import { Container, Card, Table, Button, Form, Badge, Spinner, Alert, Modal } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
 import { useSidebar } from '../../hooks/useSidebar';
 import { getUsersRealtime, deleteUser } from '../../firebase/services';
@@ -15,6 +15,8 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
     const unsubscribe = getUsersRealtime((usersData) => {
@@ -138,18 +140,40 @@ const Users = () => {
     );
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await deleteUser(userId);
-        setSuccess('User deleted successfully');
-        setError(null);
-      } catch (err) {
-        console.error('Error deleting user:', err);
-        setError('Failed to delete user');
-        setSuccess(null);
-      }
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setShowConfirmDelete(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete || !userToDelete.id) {
+      console.error("No user selected for deletion");
+      setError("Failed to delete user: No user selected");
+      setShowConfirmDelete(false);
+      setUserToDelete(null);
+      return;
     }
+
+    console.log("Attempting to delete user:", userToDelete.id);
+
+    try {
+      await deleteUser(userToDelete.id);
+      console.log("User successfully deleted:", userToDelete.id);
+      setSuccess('User deleted successfully');
+      setError(null);
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      setError(`Failed to delete user: ${err.message || "Unknown error"}`);
+      setSuccess(null);
+    } finally {
+      setShowConfirmDelete(false);
+      setUserToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowConfirmDelete(false);
+    setUserToDelete(null);
   };
 
   if (loading) {
@@ -182,7 +206,6 @@ const Users = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <i className="bi bi-people fs-2 text-primary me-2"></i>
             <h1 className="mb-0">User Management</h1>
           </div>
 
@@ -272,15 +295,35 @@ const Users = () => {
                         <tr key={user.id}>
                           <td>
                             <div className="d-flex align-items-center">
-                              {user.profile_image_url ? (
-                                <img
-                                  src={user.profile_image_url}
-                                  alt={user.name}
-                                  className="rounded-circle me-3"
-                                  width="40"
-                                  height="40"
-                                  style={{ objectFit: 'cover' }}
-                                />
+                              {(user.profile_image_url || user.photoUrl) ? (
+                                <>
+                                  <img
+                                    src={user.profile_image_url || user.photoUrl}
+                                    alt={user.name}
+                                    className="rounded-circle me-3"
+                                    width="40"
+                                    height="40"
+                                    style={{ objectFit: 'cover', display: 'block' }}
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      const fallback = e.target.nextElementSibling;
+                                      if (fallback) {
+                                        fallback.style.display = 'flex';
+                                        fallback.classList.add('d-flex');
+                                      }
+                                    }}
+                                  />
+                                  <div
+                                    className="rounded-circle bg-secondary bg-opacity-25 align-items-center justify-content-center me-3"
+                                    style={{
+                                      width: '40px',
+                                      height: '40px',
+                                      display: 'none'
+                                    }}
+                                  >
+                                    <i className="bi bi-person text-secondary"></i>
+                                  </div>
+                                </>
                               ) : (
                                 <div
                                   className="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center me-3"
@@ -331,7 +374,7 @@ const Users = () => {
                               <Button
                                 variant="outline-danger"
                                 size="sm"
-                                onClick={() => handleDeleteUser(user.id)}
+                                onClick={() => handleDeleteClick(user)}
                                 aria-label={`Delete ${user.name || 'user'}`}
                               >
                                 <i className="bi bi-trash"></i>
@@ -366,6 +409,36 @@ const Users = () => {
               </div>
             </Card.Body>
           </Card>
+
+          {/* Delete confirmation modal */}
+          <Modal
+            show={showConfirmDelete}
+            onHide={cancelDelete}
+            backdrop="static"
+            keyboard={false}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Delete</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>Are you sure you want to delete this user?</p>
+              <div className="alert alert-secondary">
+                <strong>{userToDelete?.name || 'Unnamed User'}</strong>
+                <br />
+                <small className="text-muted">{userToDelete?.email}</small>
+              </div>
+              <p className="text-danger">This action cannot be undone.</p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={cancelDelete}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={confirmDelete}>
+                Delete User
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </Container>
       </div>
     </div>

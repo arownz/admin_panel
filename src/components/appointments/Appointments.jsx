@@ -87,18 +87,43 @@ const Appointments = () => {
     }
   };
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
       case 'completed':
-        return 'bg-success';
+        return (
+          <span className="badge bg-success">
+            <i className="bi bi-check-circle me-1"></i>
+            {status.toUpperCase()}
+          </span>
+        );
       case 'cancelled':
-        return 'bg-danger';
+        return (
+          <span className="badge bg-danger">
+            <i className="bi bi-x-circle me-1"></i>
+            {status.toUpperCase()}
+          </span>
+        );
       case 'scheduled':
-        return 'bg-primary';
+        return (
+          <span className="badge bg-primary">
+            <i className="bi bi-calendar-check me-1"></i>
+            {status.toUpperCase()}
+          </span>
+        );
       case 'pending':
-        return 'bg-warning';
+        return (
+          <span className="badge bg-warning">
+            <i className="bi bi-clock me-1"></i>
+            {status.toUpperCase()}
+          </span>
+        );
       default:
-        return 'bg-secondary';
+        return (
+          <span className="badge bg-secondary">
+            <i className="bi bi-dash-circle me-1"></i>
+            {status.toUpperCase()}
+          </span>
+        );
     }
   };
 
@@ -111,7 +136,6 @@ const Appointments = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <i className="bi bi-calendar-check fs-2 text-primary me-2"></i>
             <h1 className="mb-0">Appointments</h1>
           </div>
           <div className="data-table-container">
@@ -153,45 +177,65 @@ const Appointments = () => {
                 {error}
               </div>
             ) : (
-              <div className="table-responsive">
-                <table className="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>User</th>
-                      <th>Professional</th>
-                      <th>Specialty</th>
-                      <th>Date & Time</th>
-                      <th>Status</th>
-                      <th>Created At</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAppointments.map(appointment => (
-                      <tr key={appointment.id}>
-                        <td>{appointment.id}</td>
-                        <td>{appointment.userName}</td>
-                        <td>{appointment.professionalName}</td>
-                        <td>{appointment.specialty}</td>
-                        <td>{formatDate(appointment.appointmentTime)}</td>
-                        <td>
-                          <span className={`badge ${getStatusBadgeClass(appointment.status)}`}>
-                            {appointment.status?.toUpperCase()}
-                          </span>
-                        </td>
-                        <td>{formatDate(appointment.createdAt)}</td>
-                        <td>
-                          {/* Removed Edit and Delete buttons, kept only View */}
-                          <Link to={`/appointments/${appointment.id}`} className="btn btn-sm btn-info">
-                            <i className="bi bi-eye"></i>
-                          </Link>
-                        </td>
+              <>
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Professional</th>
+                        <th>Specialty</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredAppointments.map(appointment => (
+                        <tr key={appointment.id}>
+                          <td>{appointment.id}</td>
+                          <td>{appointment.userName}</td>
+                          <td>{appointment.professionalName}</td>
+                          <td>{appointment.specialty}</td>
+                          <td>{formatDate(appointment.appointmentTime)}</td>
+                          <td>
+                            {getStatusBadge(appointment.status)}
+                          </td>
+                          <td>{formatDate(appointment.createdAt)}</td>
+                          <td>
+                            {/* Removed Edit and Delete buttons, kept only View */}
+                            <Link to={`/appointments/${appointment.id}`} className="btn btn-sm btn-info">
+                              <i className="bi bi-eye"></i>
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                  <small className="text-muted">
+                    Showing {filteredAppointments.length} of {appointments.length} appointments
+                  </small>
+                  <div className="d-flex gap-3">
+                    <small className="text-muted">
+                      <Badge bg="warning" className="me-1">{appointments.filter(a => a.status === 'scheduled').length}</Badge>
+                      Scheduled
+                    </small>
+                    <small className="text-muted">
+                      <Badge bg="success" className="me-1">{appointments.filter(a => a.status === 'completed').length}</Badge>
+                      Completed
+                    </small>
+                    <small className="text-muted">
+                      <Badge bg="danger" className="me-1">{appointments.filter(a => a.status === 'cancelled').length}</Badge>
+                      Cancelled
+                    </small>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </Container>

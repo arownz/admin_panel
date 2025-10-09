@@ -6,6 +6,7 @@ import { validateAdminCode, markCodeAsUsed } from '../../firebase/services';
 
 const Login = () => {
   const [authCode, setAuthCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showBootstrapMessage, setShowBootstrapMessage] = useState(true);
@@ -55,10 +56,10 @@ const Login = () => {
       const validation = await validateAdminCode(authCode.trim());
 
       if (validation.valid) {
-        // Mark the code as used if it's a one-time code
-        if (validation.codeData.isOneTime) {
-          await markCodeAsUsed(validation.codeId, 'admin-login');
-        }
+        // Always mark the code as used (with usedAt timestamp)
+        // For one-time codes, this makes them invalid
+        // For reusable codes, this just logs usage but keeps them valid
+        await markCodeAsUsed(validation.codeId, 'admin-login');
 
         // Login successful
         login(authCode.trim());
@@ -78,14 +79,19 @@ const Login = () => {
   return (
     <div className="login-container">
       <Card className="login-form">
-        <Card.Body className="p-4">
+        <Card.Body className="p-4 p-md-5">
           <div className="text-center mb-4">
-            {/* Large Lock Icon */}
-            <div className="admin-icon mb-3">
-              <i className="bi bi-shield-lock-fill"></i>
+            {/* TeamLexia Logo */}
+            <div className="login-logo mb-3">
+              <img
+                src="/logo.png"
+                alt="TeamLexia Logo"
+                className="img-fluid"
+                style={{ width: '80px', height: '80px', objectFit: 'contain' }}
+              />
             </div>
-            <h1 className="display-6 fw-bold mb-2">TeamLexia Admin</h1>
-            <p className="text-muted fs-6">Enter your temporary authentication code to access the admin panel</p>
+            <h1 className="h3 h1-md fw-bold mb-2">TeamLexia Admin</h1>
+            <p className="text-muted small">Enter your authentication code to access the admin panel</p>
             {showBootstrapMessage && (
               <div className="alert alert-info small">
                 <strong>First-time setup:</strong> Use code <code>ADMINTEMP</code> to access Admin Codes management
@@ -108,15 +114,28 @@ const Login = () => {
                   <i className="bi bi-key-fill text-primary"></i>
                 </span>
                 <Form.Control
-                  type="password"
-                  placeholder="Enter your temporary admin code"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your admin code"
                   value={authCode}
                   onChange={(e) => setAuthCode(e.target.value)}
                   disabled={loading}
                   autoFocus
-                  className="form-control-lg border-start-0"
+                  className="form-control-lg border-start-0 border-end-0"
                   style={{ fontSize: '1rem' }}
                 />
+                <button
+                  className="btn btn-outline-secondary border-start-0"
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  style={{
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0
+                  }}
+                >
+                  <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                </button>
               </div>
             </Form.Group>
 

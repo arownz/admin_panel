@@ -208,15 +208,59 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'completed': return 'bg-success';
-      case 'cancelled': return 'bg-danger';
-      case 'scheduled': return 'bg-primary';
-      case 'active': return 'bg-success';
-      case 'inactive': return 'bg-secondary';
-      case 'pending': return 'bg-warning';
-      default: return 'bg-secondary';
+  const getStatusBadge = (status) => {
+    const statusLower = (status || '').toLowerCase();
+
+    switch (statusLower) {
+      case 'completed':
+        return (
+          <span className="badge bg-success">
+            <i className="bi bi-check-circle me-1"></i>
+            COMPLETED
+          </span>
+        );
+      case 'cancelled':
+        return (
+          <span className="badge bg-danger">
+            <i className="bi bi-x-circle me-1"></i>
+            CANCELLED
+          </span>
+        );
+      case 'scheduled':
+        return (
+          <span className="badge bg-primary">
+            <i className="bi bi-calendar-check me-1"></i>
+            SCHEDULED
+          </span>
+        );
+      case 'pending':
+        return (
+          <span className="badge bg-warning">
+            <i className="bi bi-clock me-1"></i>
+            PENDING
+          </span>
+        );
+      case 'active':
+        return (
+          <span className="badge bg-success">
+            <i className="bi bi-check-circle me-1"></i>
+            ACTIVE
+          </span>
+        );
+      case 'inactive':
+        return (
+          <span className="badge bg-secondary">
+            <i className="bi bi-dash-circle me-1"></i>
+            INACTIVE
+          </span>
+        );
+      default:
+        return (
+          <span className="badge bg-secondary">
+            <i className="bi bi-question-circle me-1"></i>
+            {status ? status.toUpperCase() : 'UNKNOWN'}
+          </span>
+        );
     }
   };
 
@@ -266,7 +310,6 @@ const Dashboard = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <i className="bi bi-speedometer2 fs-2 text-primary me-2"></i>
             <h1 className="mb-0">Dashboard Overview</h1>
           </div>
 
@@ -442,9 +485,7 @@ const Dashboard = () => {
                             </td>
                             <td>{user.email}</td>
                             <td>
-                              <span className={`badge ${getStatusBadgeClass(user.status || 'active')}`}>
-                                {user.status || 'Active'}
-                              </span>
+                              {getStatusBadge(user.status || 'active')}
                             </td>
                             <td>{formatDate(user.createdAt)}</td>
                           </tr>
@@ -496,9 +537,7 @@ const Dashboard = () => {
                               }
                             </td>
                             <td>
-                              <span className={`badge ${getStatusBadgeClass(appointment.status)}`}>
-                                {appointment.status || 'Scheduled'}
-                              </span>
+                              {getStatusBadge(appointment.status || 'scheduled')}
                             </td>
                           </tr>
                         ))}

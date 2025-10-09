@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Card, Table, Badge, Button, Form, InputGroup, Spinner, Alert } from 'react-bootstrap';
+import { Container, Card, Table, Badge, Button, Form, InputGroup, Spinner, Alert, Modal } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
 import { useSidebar } from '../../hooks/useSidebar';
 import { getVerificationRequests, updateVerificationStatus } from '../../firebase/services';
@@ -16,6 +16,9 @@ const VerificationRequests = () => {
   const [professionFilter, setProfessionFilter] = useState('all');
   const [processing, setProcessing] = useState({});
   const [success, setSuccess] = useState(null);
+  const [showConfirmAction, setShowConfirmAction] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [actionType, setActionType] = useState('');
 
   useEffect(() => {
     fetchVerificationRequests();
@@ -104,6 +107,27 @@ const VerificationRequests = () => {
     }
   };
 
+  const handleActionClick = (request, action) => {
+    setSelectedRequest(request);
+    setActionType(action);
+    setShowConfirmAction(true);
+  };
+
+  const confirmAction = async () => {
+    if (!selectedRequest || !actionType) return;
+
+    setShowConfirmAction(false);
+    await handleStatusUpdate(selectedRequest.id, actionType);
+    setSelectedRequest(null);
+    setActionType('');
+  };
+
+  const cancelAction = () => {
+    setShowConfirmAction(false);
+    setSelectedRequest(null);
+    setActionType('');
+  };
+
   const getStatusBadge = (status) => {
     const statusConfig = {
       pending: { variant: 'warning', icon: 'clock' },
@@ -156,7 +180,6 @@ const VerificationRequests = () => {
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
-            <i className="bi bi-patch-check fs-2 text-primary me-2"></i>
             <h1 className="mb-0">Verification Requests</h1>
           </div>
 
@@ -304,7 +327,7 @@ const VerificationRequests = () => {
                                   <Button
                                     variant="outline-success"
                                     size="sm"
-                                    onClick={() => handleStatusUpdate(request.id, 'approved')}
+                                    onClick={() => handleActionClick(request, 'approved')}
                                     disabled={processing[request.id]}
                                     title="Approve"
                                   >
@@ -317,7 +340,7 @@ const VerificationRequests = () => {
                                   <Button
                                     variant="outline-danger"
                                     size="sm"
-                                    onClick={() => handleStatusUpdate(request.id, 'rejected')}
+                                    onClick={() => handleActionClick(request, 'rejected')}
                                     disabled={processing[request.id]}
                                     title="Reject"
                                   >
@@ -359,6 +382,50 @@ const VerificationRequests = () => {
               </div>
             </Card.Body>
           </Card>
+
+          {/* Confirmation Modal */}
+          <Modal
+            show={showConfirmAction}
+            onHide={cancelAction}
+            backdrop="static"
+            keyboard={false}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {actionType === 'approved' ? 'Approve Verification Request' : 'Reject Verification Request'}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                Are you sure you want to {actionType === 'approved' ? 'approve' : 'reject'} this verification request?
+              </p>
+              {selectedRequest && (
+                <div className="alert alert-info">
+                  <p className="mb-1"><strong>Professional:</strong> {selectedRequest.userName || 'Unknown'}</p>
+                  <p className="mb-1"><strong>Profession:</strong> {selectedRequest.profession}</p>
+                  <p className="mb-0"><strong>Work Email:</strong> {selectedRequest.workEmail}</p>
+                </div>
+              )}
+              <p className="text-muted mb-0">
+                <i className="bi bi-info-circle me-2"></i>
+                {actionType === 'approved'
+                  ? 'This will grant the user professional verification status.'
+                  : 'This will reject the verification request. The user can resubmit later.'}
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={cancelAction}>
+                Cancel
+              </Button>
+              <Button
+                variant={actionType === 'approved' ? 'success' : 'danger'}
+                onClick={confirmAction}
+              >
+                {actionType === 'approved' ? 'Approve' : 'Reject'}
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </Container>
       </div>
     </div>
