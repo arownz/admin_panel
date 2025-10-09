@@ -57,28 +57,28 @@ const ReportedPostDetail = () => {
   const getSeverityBadge = (severity) => {
     switch (severity) {
       case 'high':
-        return <Badge bg="danger">High</Badge>;
+        return <Badge bg="danger">HIGH</Badge>;
       case 'medium':
-        return <Badge bg="warning">Medium</Badge>;
+        return <Badge bg="warning">MEDIUM</Badge>;
       case 'low':
-        return <Badge bg="info">Low</Badge>;
+        return <Badge bg="info">LOW</Badge>;
       default:
-        return <Badge bg="secondary">{severity || 'Unknown'}</Badge>;
+        return <Badge bg="secondary">{severity?.toUpperCase() || 'UNKNOWN'}</Badge>;
     }
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
-        return <Badge bg="warning">Pending Review</Badge>;
+        return <Badge bg="warning">PENDING REVIEW</Badge>;
       case 'approved':
-        return <Badge bg="success">Approved</Badge>;
+        return <Badge bg="success">APPROVED</Badge>;
       case 'rejected':
-        return <Badge bg="danger">Rejected</Badge>;
+        return <Badge bg="danger">REJECTED</Badge>;
       case 'resolved':
-        return <Badge bg="primary">Resolved</Badge>;
+        return <Badge bg="primary">RESOLVED</Badge>;
       default:
-        return <Badge bg="secondary">{status || 'Unknown'}</Badge>;
+        return <Badge bg="secondary">{status?.toUpperCase() || 'UNKNOWN'}</Badge>;
     }
   };
 

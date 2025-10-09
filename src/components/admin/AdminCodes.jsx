@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Card, Table, Button, Modal, Form, Alert, Badge, InputGroup } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
+import { useSidebar } from '../../hooks/useSidebar';
 import {
     generateAdminCode,
     getAdminCodes,
@@ -10,7 +11,12 @@ import {
 } from '../../firebase/services';
 
 const AdminCodes = () => {
+    const { toggleSidebar, isCollapsed } = useSidebar();
     const [codes, setCodes] = useState([]);
+    const [filteredCodes, setFilteredCodes] = useState([]);
+    const [statusFilter, setStatusFilter] = useState('all'); // all, active, expired, used
+    const [typeFilter, setTypeFilter] = useState('all'); // all, one-time, reusable
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
@@ -29,7 +35,61 @@ const AdminCodes = () => {
         cleanupExpiredCodes().catch(err => {
             console.error('Failed to cleanup expired codes on mount:', err);
         });
-    }, []); const fetchAdminCodes = async () => {
+    }, []);
+
+    // Filter codes based on status, type, and search
+    useEffect(() => {
+        let filtered = [...codes];
+
+        // Status filter
+        if (statusFilter !== 'all') {
+            const now = new Date();
+            filtered = filtered.filter(code => {
+                const expiresAt = convertTimestamp(code.expiresAt);
+                const isExpired = expiresAt && expiresAt < now;
+
+                if (statusFilter === 'active') {
+                    return !isExpired && !code.isUsed;
+                } else if (statusFilter === 'expired') {
+                    return isExpired;
+                } else if (statusFilter === 'used') {
+                    return code.isUsed;
+                }
+                return true;
+            });
+        }
+
+        // Type filter
+        if (typeFilter !== 'all') {
+            filtered = filtered.filter(code => {
+                if (typeFilter === 'one-time') {
+                    return code.isOneTime === true;
+                } else if (typeFilter === 'reusable') {
+                    return code.isOneTime === false;
+                }
+                return true;
+            });
+        }
+
+        // Search filter
+        if (searchTerm) {
+            filtered = filtered.filter(code =>
+                code.code?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        setFilteredCodes(filtered);
+    }, [codes, statusFilter, typeFilter, searchTerm]);
+
+    // Auto-dismiss success messages after 3 seconds
+    useEffect(() => {
+        if (success) {
+            const timer = setTimeout(() => {
+                setSuccess(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [success]); const fetchAdminCodes = async () => {
         try {
             setLoading(true);
             const codesData = await getAdminCodes();
@@ -101,11 +161,11 @@ const AdminCodes = () => {
         const expiresAt = new Date(code.expiresAt);
 
         if (code.isUsed) {
-            return <Badge bg="secondary">Used</Badge>;
+            return <Badge bg="secondary">USED</Badge>;
         } else if (now > expiresAt) {
-            return <Badge bg="danger">Expired</Badge>;
+            return <Badge bg="danger">EXPIRED</Badge>;
         } else {
-            return <Badge bg="success">Active</Badge>;
+            return <Badge bg="success">ACTIVE</Badge>;
         }
     };
 
@@ -129,7 +189,10 @@ const AdminCodes = () => {
     return (
         <div className="admin-container">
             <Sidebar />
-            <div className="main-content">
+            <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar} aria-label="Toggle navigation menu">
+                <i className="bi bi-list fs-4"></i>
+            </button>
+            <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
                 <Container fluid className="py-3">
                     <div className="d-flex align-items-center mb-4">
                         <i className="bi bi-key fs-2 text-primary me-2"></i>
@@ -167,9 +230,56 @@ const AdminCodes = () => {
                                         Cleanup Expired
                                     </Button>
                                 </div>
+                            </div>
 
-                                <div className="text-muted">
-                                    Total: {codes.length} codes
+                            {/* Filter Section */}
+                            <div className="mb-4 p-3 bg-light rounded">
+                                <div className="row g-3">
+                                    <div className="col-md-3">
+                                        <Form.Label className="small text-muted mb-1">Status</Form.Label>
+                                        <Form.Select
+                                            size="sm"
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            aria-label="Filter admin codes by status"
+                                        >
+                                            <option value="all">All Status</option>
+                                            <option value="active">Active</option>
+                                            <option value="expired">Expired</option>
+                                            <option value="used">Used</option>
+                                        </Form.Select>
+                                    </div>
+                                    <div className="col-md-3">
+                                        <Form.Label className="small text-muted mb-1">Type</Form.Label>
+                                        <Form.Select
+                                            size="sm"
+                                            value={typeFilter}
+                                            onChange={(e) => setTypeFilter(e.target.value)}
+                                            aria-label="Filter admin codes by type"
+                                        >
+                                            <option value="all">All Types</option>
+                                            <option value="one-time">One-Time</option>
+                                            <option value="reusable">Reusable</option>
+                                        </Form.Select>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <Form.Label className="small text-muted mb-1">Search Code</Form.Label>
+                                        <InputGroup size="sm">
+                                            <InputGroup.Text>
+                                                <i className="bi bi-search"></i>
+                                            </InputGroup.Text>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Search by code..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                aria-label="Search admin codes"
+                                            />
+                                        </InputGroup>
+                                    </div>
+                                </div>
+                                <div className="mt-2 small text-muted">
+                                    Showing {filteredCodes.length} of {codes.length} codes
                                 </div>
                             </div>
 
@@ -195,17 +305,19 @@ const AdminCodes = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {codes.length === 0 ? (
+                                            {filteredCodes.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="8" className="text-center py-5">
                                                         <div>
                                                             <i className="bi bi-key display-4 text-muted mb-3"></i>
-                                                            <div className="text-muted">No admin codes found</div>
+                                                            <div className="text-muted">
+                                                                {codes.length === 0 ? 'No admin codes found' : 'No codes match the current filters'}
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                codes.map((code) => (
+                                                filteredCodes.map((code) => (
                                                     <tr key={code.id}>
                                                         <td>
                                                             <div className="d-flex align-items-center">
@@ -223,7 +335,7 @@ const AdminCodes = () => {
                                                         <td>{getStatusBadge(code)}</td>
                                                         <td>
                                                             <Badge bg={code.isOneTime ? 'info' : 'warning'}>
-                                                                {code.isOneTime ? 'One-time' : 'Reusable'}
+                                                                {code.isOneTime ? 'ONE-TIME' : 'REUSABLE'}
                                                             </Badge>
                                                         </td>
                                                         <td>

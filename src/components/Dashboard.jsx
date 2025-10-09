@@ -15,6 +15,7 @@ import {
   LineElement
 } from 'chart.js';
 import Sidebar from './Sidebar';
+import { useSidebar } from '../hooks/useSidebar';
 import {
   getUsers,
   getAppointments,
@@ -38,6 +39,7 @@ ChartJS.register(
 );
 
 const Dashboard = () => {
+  const { toggleSidebar, isCollapsed } = useSidebar();
   const [stats, setStats] = useState({
     users: 0,
     appointments: 0,
@@ -222,7 +224,10 @@ const Dashboard = () => {
     return (
       <div className="admin-container">
         <Sidebar />
-        <div className="main-content">
+        <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+          <i className="bi bi-list fs-4"></i>
+        </button>
+        <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
           <Container fluid className="py-3">
             <div className="text-center py-5">
               <div className="spinner-border text-primary" role="status">
@@ -240,7 +245,10 @@ const Dashboard = () => {
     return (
       <div className="admin-container">
         <Sidebar />
-        <div className="main-content">
+        <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+          <i className="bi bi-list fs-4"></i>
+        </button>
+        <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
           <Container fluid className="py-3">
             <Alert variant="danger">{error}</Alert>
           </Container>
@@ -252,7 +260,10 @@ const Dashboard = () => {
   return (
     <div className="admin-container">
       <Sidebar />
-      <div className="main-content">
+      <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+        <i className="bi bi-list fs-4"></i>
+      </button>
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
             <i className="bi bi-speedometer2 fs-2 text-primary me-2"></i>

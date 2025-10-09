@@ -6,7 +6,7 @@ import { useSidebar } from '../../hooks/useSidebar';
 import { getUsersRealtime, deleteUser } from '../../firebase/services';
 
 const Users = () => {
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,6 +14,7 @@ const Users = () => {
   const [verificationFilter, setVerificationFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const unsubscribe = getUsersRealtime((usersData) => {
@@ -29,6 +30,25 @@ const Users = () => {
     };
   }, []);
 
+  // Auto-dismiss success and error messages after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   useEffect(() => {
     let filtered = [...users];
 
@@ -39,8 +59,10 @@ const Users = () => {
     if (verificationFilter !== 'all') {
       if (verificationFilter === 'verified') {
         filtered = filtered.filter(user => user.isVerified || user.verificationStatus === 'verified');
+      } else if (verificationFilter === 'pending') {
+        filtered = filtered.filter(user => user.verificationStatus === 'pending');
       } else if (verificationFilter === 'unverified') {
-        filtered = filtered.filter(user => !user.isVerified && user.verificationStatus !== 'verified');
+        filtered = filtered.filter(user => !user.isVerified && user.verificationStatus !== 'verified' && user.verificationStatus !== 'pending');
       }
     }
 
@@ -85,25 +107,47 @@ const Users = () => {
 
   const getVerificationBadge = (user) => {
     if (user.isVerified || user.verificationStatus === 'verified') {
-      return <Badge bg="success">✓ Verified</Badge>;
+      return (
+        <Badge bg="success">
+          <i className="bi bi-check-circle me-1"></i>
+          VERIFIED
+        </Badge>
+      );
     }
     if (user.verificationStatus === 'pending') {
-      return <Badge bg="warning">⏳ Pending</Badge>;
+      return (
+        <Badge bg="warning">
+          <i className="bi bi-clock me-1"></i>
+          PENDING
+        </Badge>
+      );
     }
     if (user.verificationStatus === 'rejected') {
-      return <Badge bg="danger">✗ Rejected</Badge>;
+      return (
+        <Badge bg="danger">
+          <i className="bi bi-x-circle me-1"></i>
+          REJECTED
+        </Badge>
+      );
     }
-    return <Badge bg="secondary">Unverified</Badge>;
+    return (
+      <Badge bg="secondary">
+        <i className="bi bi-dash-circle me-1"></i>
+        UNVERIFIED
+      </Badge>
+    );
   };
 
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await deleteUser(userId);
+        setSuccess('User deleted successfully');
         setError(null);
       } catch (err) {
         console.error('Error deleting user:', err);
         setError('Failed to delete user');
+        setSuccess(null);
       }
     }
   };
@@ -127,6 +171,14 @@ const Users = () => {
   return (
     <div className="admin-container">
       <Sidebar />
+      {/* Mobile Menu Toggle */}
+      <button
+        className="mobile-menu-toggle d-lg-none"
+        onClick={toggleSidebar}
+        aria-label="Toggle navigation menu"
+      >
+        <i className="bi bi-list fs-4"></i>
+      </button>
       <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
@@ -140,6 +192,12 @@ const Users = () => {
             </Alert>
           )}
 
+          {success && (
+            <Alert variant="success" onClose={() => setSuccess(null)} dismissible>
+              {success}
+            </Alert>
+          )}
+
           <Card className="border-0 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
@@ -150,12 +208,14 @@ const Users = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{ width: '250px' }}
+                    aria-label="Search users by name, email, profession, or affiliation"
                   />
 
                   <Form.Select
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
                     style={{ width: '150px' }}
+                    aria-label="Filter users by role"
                   >
                     <option value="all">All Roles</option>
                     <option value="parent">Parents</option>
@@ -166,6 +226,7 @@ const Users = () => {
                     value={verificationFilter}
                     onChange={(e) => setVerificationFilter(e.target.value)}
                     style={{ width: '180px' }}
+                    aria-label="Filter users by verification status"
                   >
                     <option value="all">All Verification</option>
                     <option value="verified">Verified</option>
@@ -236,7 +297,7 @@ const Users = () => {
                           </td>
                           <td>
                             <Badge bg={user.role === 'professional' ? 'info' : 'primary'}>
-                              {user.role?.charAt(0).toUpperCase() + user.role?.slice(1)}
+                              {user.role?.toUpperCase()}
                             </Badge>
                           </td>
                           <td>
@@ -258,12 +319,12 @@ const Users = () => {
                           <td>
                             <div className="d-flex gap-1">
                               <Link to={`/users/${user.id}`}>
-                                <Button variant="outline-primary" size="sm">
+                                <Button variant="outline-primary" size="sm" aria-label={`View details for ${user.name || 'user'}`}>
                                   <i className="bi bi-eye"></i>
                                 </Button>
                               </Link>
                               <Link to={`/users/${user.id}/edit`}>
-                                <Button variant="outline-secondary" size="sm">
+                                <Button variant="outline-secondary" size="sm" aria-label={`Edit ${user.name || 'user'}`}>
                                   <i className="bi bi-pencil"></i>
                                 </Button>
                               </Link>
@@ -271,6 +332,7 @@ const Users = () => {
                                 variant="outline-danger"
                                 size="sm"
                                 onClick={() => handleDeleteUser(user.id)}
+                                aria-label={`Delete ${user.name || 'user'}`}
                               >
                                 <i className="bi bi-trash"></i>
                               </Button>

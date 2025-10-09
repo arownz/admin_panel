@@ -149,6 +149,7 @@ h1, h2, h3, h4, h5, h6 {
 .main-content.sidebar-collapsed {
   margin-left: 70px;
   width: calc(100% - 70px);
+  width: calc(100% - 70px);
 }
 
 /* Content wrapper for proper spacing */
@@ -257,6 +258,7 @@ h1, h2, h3, h4, h5, h6 {
   border: none;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.95);
 }
@@ -588,4 +590,211 @@ h1, h2, h3, h4, h5, h6 {
   vertical-align: -0.125em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   RESPONSIVE MOBILE STYLES
+   ======================================== */
+
+/* Tablet and below (iPad, tablets) */
+@media (max-width: 991px) {
+  .sidebar {
+    width: 280px;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.show {
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed {
+    width: 280px;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.collapsed.show {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .main-content.sidebar-collapsed {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  /* Mobile menu toggle button */
+  .mobile-menu-toggle {
+    display: block !important;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+  }
+  
+  /* Overlay for mobile sidebar */
+  .sidebar-overlay {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Adjust container padding for mobile toggle button */
+  .main-content .container-fluid {
+    padding-top: 70px !important;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 767px) {
+  /* Typography adjustments */
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Table responsiveness */
+  .table-responsive {
+    overflow-x: auto;
+  }
+  
+  .table {
+    font-size: 0.875rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    white-space: nowrap;
+  }
+  
+  /* Card adjustments */
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Button groups */
+  .btn-group,
+  .d-flex.gap-1,
+  .d-flex.gap-2 {
+    flex-wrap: wrap;
+  }
+  
+  /* Form controls */
+  .form-control,
+  .form-select {
+    font-size: 0.875rem;
+  }
+  
+  /* Filter section stacking */
+  .d-flex.align-items-center.gap-2 {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+  
+  .d-flex.align-items-center.gap-2 > * {
+    width: 100% !important;
+  }
+  
+  /* Stats cards */
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Dashboard adjustments */
+  .chart-container {
+    height: 250px !important;
+  }
+  
+  /* Modal adjustments */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  /* Badge adjustments */
+  .badge {
+    font-size: 0.75rem;
+  }
+  
+  /* Sidebar adjustments for mobile */
+  .sidebar {
+    width: 85vw;
+    max-width: 300px;
+  }
+  
+  .sidebar.collapsed {
+    width: 85vw;
+    max-width: 300px;
+  }
+}
+
+/* Small mobile phones */
+@media (max-width: 575px) {
+  /* Further reduce typography */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Reduce padding */
+  .container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  
+  /* Stack action buttons vertically */
+  .btn-group {
+    flex-direction: column;
+  }
+  
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  /* Table font size */
+  .table {
+    font-size: 0.75rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.35rem;
+  }
+}
+
+/* Desktop - hide mobile controls */
+@media (min-width: 992px) {
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+  
+  .sidebar-overlay {
+    display: none !important;
+  }
 }

@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Card, Table, Badge, Button, Form, InputGroup, Spinner, Alert } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
+import { useSidebar } from '../../hooks/useSidebar';
 import { getVerificationRequests, updateVerificationStatus } from '../../firebase/services';
 
 const VerificationRequests = () => {
+  const { toggleSidebar, isCollapsed } = useSidebar();
   const [requests, setRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,7 @@ const VerificationRequests = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [professionFilter, setProfessionFilter] = useState('all');
   const [processing, setProcessing] = useState({});
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     fetchVerificationRequests();
@@ -45,6 +48,25 @@ const VerificationRequests = () => {
     filterRequests();
   }, [requests, searchTerm, statusFilter, professionFilter]);
 
+  // Auto-dismiss success and error messages after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const fetchVerificationRequests = async () => {
     try {
       setLoading(true);
@@ -71,10 +93,12 @@ const VerificationRequests = () => {
           : request
       ));
 
+      setSuccess(`Verification request ${newStatus} successfully`);
       setError('');
     } catch (err) {
       console.error('Error updating verification status:', err);
       setError('Failed to update verification status');
+      setSuccess(null);
     } finally {
       setProcessing(prev => ({ ...prev, [requestId]: false }));
     }
@@ -92,7 +116,7 @@ const VerificationRequests = () => {
     return (
       <Badge bg={config.variant}>
         <i className={`bi bi-${config.icon} me-1`}></i>
-        {status?.charAt(0).toUpperCase() + status?.slice(1)}
+        {status?.toUpperCase()}
       </Badge>
     );
   };
@@ -106,7 +130,10 @@ const VerificationRequests = () => {
     return (
       <div className="admin-container">
         <Sidebar />
-        <div className="main-content">
+        <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+          <i className="bi bi-list fs-4"></i>
+        </button>
+        <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
           <Container fluid className="py-3">
             <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
               <div className="text-center">
@@ -123,7 +150,10 @@ const VerificationRequests = () => {
   return (
     <div className="admin-container">
       <Sidebar />
-      <div className="main-content">
+      <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+        <i className="bi bi-list fs-4"></i>
+      </button>
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
             <i className="bi bi-patch-check fs-2 text-primary me-2"></i>
@@ -134,6 +164,13 @@ const VerificationRequests = () => {
             <Alert variant="danger" className="mb-3">
               <i className="bi bi-exclamation-triangle me-2"></i>
               {error}
+            </Alert>
+          )}
+
+          {success && (
+            <Alert variant="success" onClose={() => setSuccess(null)} dismissible className="mb-3">
+              <i className="bi bi-check-circle me-2"></i>
+              {success}
             </Alert>
           )}
 
@@ -228,15 +265,30 @@ const VerificationRequests = () => {
                           <td>{getStatusBadge(request.status)}</td>
                           <td>
                             <small className="text-muted">
-                              {request.submittedAt ?
-                                new Date(request.submittedAt).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                }) : 'N/A'
-                              }
+                              {request.submittedAt ? (() => {
+                                try {
+                                  let date;
+                                  if (typeof request.submittedAt.toDate === 'function') {
+                                    date = request.submittedAt.toDate();
+                                  } else if (request.submittedAt.seconds) {
+                                    date = new Date(request.submittedAt.seconds * 1000);
+                                  } else {
+                                    date = new Date(request.submittedAt);
+                                  }
+
+                                  if (isNaN(date.getTime())) return 'Invalid date';
+
+                                  return date.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  });
+                                } catch {
+                                  return 'Invalid date';
+                                }
+                              })() : 'N/A'}
                             </small>
                           </td>
                           <td>

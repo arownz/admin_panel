@@ -8,7 +8,7 @@ const UserForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,7 +24,7 @@ const UserForm = () => {
     isVerified: false,
     verificationStatus: 'unverified'
   });
-  
+
   const [loading, setLoading] = useState(isEditMode);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -32,7 +32,7 @@ const UserForm = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!isEditMode) return;
-      
+
       try {
         const userData = await getUserById(id);
         setFormData({
@@ -55,9 +55,28 @@ const UserForm = () => {
         setLoading(false);
       }
     };
-    
+
     fetchUserData();
   }, [id, isEditMode]);
+
+  // Auto-dismiss success and error messages after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -71,7 +90,7 @@ const UserForm = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
       // Prepare update data
       const updateData = {
@@ -95,7 +114,7 @@ const UserForm = () => {
       await updateUser(id, updateData);
       setSuccess(true);
       setTimeout(() => navigate(`/users/${id}`), 1500);
-      
+
     } catch (err) {
       console.error('Error updating user:', err);
       setError(`Failed to update user: ${err.message}`);
@@ -126,8 +145,8 @@ const UserForm = () => {
       <div className="main-content">
         <div className="content-wrapper">
           <div className="mb-4">
-            <Button 
-              variant="outline-secondary" 
+            <Button
+              variant="outline-secondary"
               onClick={() => navigate('/users')}
               className="mb-3"
             >
@@ -136,7 +155,7 @@ const UserForm = () => {
             </Button>
             <h1 className="display-6 mb-0">Edit User</h1>
           </div>
-          
+
           {error && <Alert variant="danger">{error}</Alert>}
           {success && (
             <Alert variant="success">
@@ -144,7 +163,7 @@ const UserForm = () => {
               User successfully updated! Redirecting...
             </Alert>
           )}
-          
+
           <Card className="border-0 shadow-sm">
             <Card.Body className="p-4">
               <Form onSubmit={handleSubmit}>
@@ -153,7 +172,7 @@ const UserForm = () => {
                   <i className="bi bi-person me-2"></i>
                   Basic Information
                 </h5>
-                
+
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-4">
@@ -167,7 +186,7 @@ const UserForm = () => {
                       />
                     </Form.Group>
                   </Col>
-                  
+
                   <Col md={6}>
                     <Form.Group className="mb-4">
                       <Form.Label>Email Address</Form.Label>
@@ -193,7 +212,7 @@ const UserForm = () => {
                       <i className="bi bi-briefcase me-2"></i>
                       Professional Information
                     </h5>
-                    
+
                     <Row>
                       <Col md={6}>
                         <Form.Group className="mb-3">
@@ -207,7 +226,7 @@ const UserForm = () => {
                           />
                         </Form.Group>
                       </Col>
-                      
+
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Affiliation</Form.Label>
@@ -221,7 +240,7 @@ const UserForm = () => {
                         </Form.Group>
                       </Col>
                     </Row>
-                    
+
                     <Row>
                       <Col md={6}>
                         <Form.Group className="mb-3">
@@ -235,7 +254,7 @@ const UserForm = () => {
                           />
                         </Form.Group>
                       </Col>
-                      
+
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>License Number</Form.Label>
@@ -249,7 +268,7 @@ const UserForm = () => {
                         </Form.Group>
                       </Col>
                     </Row>
-                    
+
                     <Form.Group className="mb-3">
                       <Form.Label>Work Email</Form.Label>
                       <Form.Control
@@ -269,7 +288,7 @@ const UserForm = () => {
                   <i className="bi bi-shield-check me-2"></i>
                   Admin Controls
                 </h5>
-                
+
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
@@ -285,7 +304,7 @@ const UserForm = () => {
                       </Form.Select>
                     </Form.Group>
                   </Col>
-                  
+
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Verification Status</Form.Label>
@@ -316,18 +335,18 @@ const UserForm = () => {
                     This will give the user verified status and special privileges
                   </Form.Text>
                 </Form.Group>
-                
+
                 <div className="d-flex justify-content-between mt-4 pt-4 border-top">
-                  <Button 
-                    variant="outline-secondary" 
+                  <Button
+                    variant="outline-secondary"
                     onClick={() => navigate(`/users/${id}`)}
                     size="lg"
                   >
                     <i className="bi bi-x-circle me-2"></i>
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     variant="primary"
                     disabled={loading}
                     size="lg"

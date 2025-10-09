@@ -117,7 +117,7 @@ const AppointmentDetail = () => {
                 <Col sm={4} className="text-muted">Status:</Col>
                 <Col sm={8}>
                   <Badge bg={getStatusBadgeClass(appointment.status)}>
-                    {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1) || 'Unknown'}
+                    {appointment.status?.toUpperCase() || 'UNKNOWN'}
                   </Badge>
                 </Col>
               </Row>

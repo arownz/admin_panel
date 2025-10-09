@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../Sidebar';
+import { useSidebar } from '../../hooks/useSidebar';
 import { getAppointments } from '../../firebase/services';
 import { Container } from 'react-bootstrap';
 
 const Appointments = () => {
+  const { toggleSidebar, isCollapsed } = useSidebar();
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,6 +60,33 @@ const Appointments = () => {
     setStatusFilter(e.target.value);
   };
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+
+    try {
+      let date;
+      if (typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      } else if (timestamp.seconds) {
+        date = new Date(timestamp.seconds * 1000);
+      } else {
+        date = new Date(timestamp);
+      }
+
+      if (isNaN(date.getTime())) return 'Invalid date';
+
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'completed':
@@ -76,7 +105,10 @@ const Appointments = () => {
   return (
     <div className="admin-container">
       <Sidebar />
-      <div className="main-content">
+      <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+        <i className="bi bi-list fs-4"></i>
+      </button>
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
             <i className="bi bi-calendar-check fs-2 text-primary me-2"></i>
@@ -91,7 +123,7 @@ const Appointments = () => {
                     value={statusFilter}
                     onChange={handleStatusChange}
                   >
-                    <option value="all">All Statuses</option>
+                    <option value="all">All Status</option>
                     <option value="cancelled">Cancelled</option>
                     <option value="pending">Pending</option>
                     <option value="accepted">Accepted</option>
@@ -142,13 +174,13 @@ const Appointments = () => {
                         <td>{appointment.userName}</td>
                         <td>{appointment.professionalName}</td>
                         <td>{appointment.specialty}</td>
-                        <td>{new Date(appointment.appointmentTime).toLocaleString()}</td>
+                        <td>{formatDate(appointment.appointmentTime)}</td>
                         <td>
                           <span className={`badge ${getStatusBadgeClass(appointment.status)}`}>
-                            {appointment.status}
+                            {appointment.status?.toUpperCase()}
                           </span>
                         </td>
-                        <td>{new Date(appointment.createdAt).toLocaleString()}</td>
+                        <td>{formatDate(appointment.createdAt)}</td>
                         <td>
                           {/* Removed Edit and Delete buttons, kept only View */}
                           <Link to={`/appointments/${appointment.id}`} className="btn btn-sm btn-info">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../Sidebar';
+import { useSidebar } from '../../hooks/useSidebar';
 import { getReportedPosts, resolveReport, deletePost } from '../../firebase/services';
 import { Modal, Button, Container } from 'react-bootstrap';
 
@@ -8,6 +9,7 @@ const ReportedPosts = () => {
   // Add this console log at the beginning of your component
   console.log("Rendering ReportedPosts component");
 
+  const { toggleSidebar, isCollapsed } = useSidebar();
   const [reportedPosts, setReportedPosts] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +17,7 @@ const ReportedPosts = () => {
   const [statusFilter, setStatusFilter] = useState('all'); // Changed from 'pending' to 'all'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [showConfirmAction, setShowConfirmAction] = useState(false);
   const [actionType, setActionType] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
@@ -39,6 +42,25 @@ const ReportedPosts = () => {
 
     fetchReportedPosts(); // This line ensures the function is actually called
   }, []);
+
+  // Auto-dismiss success and error messages after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (!reportedPosts || reportedPosts.length === 0) {
@@ -107,6 +129,7 @@ const ReportedPosts = () => {
         );
         setReportedPosts(updatedReports);
         setFilteredReports(updatedReports);
+        setSuccess('Report dismissed successfully');
       } else if (actionType === 'remove') {
         // Resolve the report and delete the post
         console.log(`Attempting to delete post ${selectedReport.postId}`);
@@ -134,6 +157,7 @@ const ReportedPosts = () => {
         );
         setReportedPosts(updatedReports);
         setFilteredReports(updatedReports);
+        setSuccess('Post removed successfully');
       }
 
       // Always close the modal and reset state
@@ -165,10 +189,40 @@ const ReportedPosts = () => {
     return Array.from(reasons);
   };
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+
+    try {
+      let date;
+      if (typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      } else if (timestamp.seconds) {
+        date = new Date(timestamp.seconds * 1000);
+      } else {
+        date = new Date(timestamp);
+      }
+
+      if (isNaN(date.getTime())) return 'Invalid date';
+
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
   return (
     <div className="admin-container">
       <Sidebar />
-      <div className={`main-content`}>
+      <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+        <i className="bi bi-list fs-4"></i>
+      </button>
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
             <i className="bi bi-flag fs-2 text-primary me-2"></i>
@@ -178,6 +232,13 @@ const ReportedPosts = () => {
           {error && (
             <div className="alert alert-danger" role="alert">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="alert alert-success alert-dismissible fade show" role="alert">
+              {success}
+              <button type="button" className="btn-close" onClick={() => setSuccess(null)} aria-label="Close"></button>
             </div>
           )}
 
@@ -237,7 +298,7 @@ const ReportedPosts = () => {
                       <th>Author</th>
                       <th>Reported By</th>
                       <th>Reason</th>
-                      <th>Status</th> {/* New column */}
+                      <th>Status</th>
                       <th>Reported At</th>
                       <th>Actions</th>
                     </tr>
@@ -256,14 +317,14 @@ const ReportedPosts = () => {
                         <td>{report.post?.authorName || 'Unknown'}</td>
                         <td>{report.reportedBy}</td>
                         <td>
-                          <span className="badge bg-warning">{report.reason}</span>
+                          <span className="badge bg-warning">{report.reason?.toUpperCase()}</span>
                         </td>
                         <td>
-                          {report.status === 'pending' && <span className="badge bg-warning">Pending</span>}
-                          {report.status === 'rejected' && <span className="badge bg-secondary">Dismissed</span>}
-                          {report.status === 'deleted' && <span className="badge bg-danger">Removed</span>}
+                          {report.status === 'pending' && <span className="badge bg-warning">PENDING</span>}
+                          {report.status === 'rejected' && <span className="badge bg-secondary">DISMISSED</span>}
+                          {report.status === 'deleted' && <span className="badge bg-danger">REMOVED</span>}
                         </td>
-                        <td>{new Date(report.reportedAt).toLocaleString()}</td>
+                        <td>{formatDate(report.reportedAt)}</td>
                         <td>
                           <div className="btn-group">
                             <Link to={`/reported-posts/${report.id}`} className="btn btn-sm btn-info">

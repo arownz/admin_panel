@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Card, Table, Button, Form, Modal, Alert, Badge } from 'react-bootstrap';
 import Sidebar from '../Sidebar';
+import { useSidebar } from '../../hooks/useSidebar';
 import { getPosts, deletePost } from '../../firebase/services';
 
 const Posts = () => {
+  const { toggleSidebar, isCollapsed } = useSidebar();
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
 
@@ -31,6 +34,25 @@ const Posts = () => {
     fetchPosts();
   }, []);
 
+  // Auto-dismiss success and error messages after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   useEffect(() => {
     let results = [...posts];
 
@@ -43,7 +65,34 @@ const Posts = () => {
     }
 
     setFilteredPosts(results);
-  }, [searchTerm, posts]); const handleSearchChange = (e) => {
+  }, [searchTerm, posts]);
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+
+    try {
+      let date;
+      if (typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      } else if (timestamp.seconds) {
+        date = new Date(timestamp.seconds * 1000);
+      } else {
+        date = new Date(timestamp);
+      }
+
+      if (isNaN(date.getTime())) return 'Invalid date';
+
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
+  const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
@@ -70,6 +119,7 @@ const Posts = () => {
       const updatedPosts = posts.filter(post => post.id !== postToDelete.id);
       setPosts(updatedPosts);
       setFilteredPosts(updatedPosts);
+      setSuccess('Post deleted successfully');
     } catch (err) {
       console.error("Error deleting post:", err);
       setError(`Failed to delete post: ${err.message || "Unknown error"}`);
@@ -94,7 +144,10 @@ const Posts = () => {
   return (
     <div className="admin-container">
       <Sidebar />
-      <div className="main-content">
+      <button className="mobile-menu-toggle d-lg-none" onClick={toggleSidebar}>
+        <i className="bi bi-list fs-4"></i>
+      </button>
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Container fluid className="py-3">
           <div className="d-flex align-items-center mb-4">
             <i className="bi bi-file-post fs-2 text-primary me-2"></i>
@@ -104,6 +157,12 @@ const Posts = () => {
           {error && (
             <Alert variant="danger" onClose={() => setError(null)} dismissible>
               {error}
+            </Alert>
+          )}
+
+          {success && (
+            <Alert variant="success" onClose={() => setSuccess(null)} dismissible>
+              {success}
             </Alert>
           )}
 
@@ -181,7 +240,7 @@ const Posts = () => {
                           </td>
                           <td>
                             <small className="text-muted">
-                              {new Date(post.createdAt).toLocaleDateString()}
+                              {formatDate(post.createdAt)}
                             </small>
                           </td>
                           <td>

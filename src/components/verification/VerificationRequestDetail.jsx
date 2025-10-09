@@ -78,7 +78,7 @@ const VerificationRequestDetail = () => {
     return (
       <Badge bg={config.variant} className="fs-6 px-3 py-2">
         <i className={`bi bi-${config.icon} me-2`}></i>
-        {status?.charAt(0).toUpperCase() + status?.slice(1)}
+        {status?.toUpperCase()}
       </Badge>
     );
   };

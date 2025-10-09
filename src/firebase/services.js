@@ -637,23 +637,50 @@ export const deleteAdminCode = async (codeId) => {
   }
 };
 
-// Cleanup expired codes
+// Cleanup expired codes and used one-time codes
 export const cleanupExpiredCodes = async () => {
   try {
-    const q = query(
+    const now = new Date();
+    
+    // Query 1: Get expired codes
+    const expiredQuery = query(
       collection(db, 'adminCodes'),
-      where('expiresAt', '<', new Date())
+      where('expiresAt', '<', now)
     );
     
-    const querySnapshot = await getDocs(q);
-    const deletePromises = [];
+    // Query 2: Get used one-time codes
+    const usedOneTimeQuery = query(
+      collection(db, 'adminCodes'),
+      where('isOneTime', '==', true),
+      where('isUsed', '==', true)
+    );
     
-    querySnapshot.forEach((doc) => {
-      deletePromises.push(deleteDoc(doc.ref));
+    const [expiredSnapshot, usedOneTimeSnapshot] = await Promise.all([
+      getDocs(expiredQuery),
+      getDocs(usedOneTimeQuery)
+    ]);
+    
+    const deletePromises = [];
+    const deletedIds = new Set();
+    
+    // Collect expired codes
+    expiredSnapshot.forEach((doc) => {
+      if (!deletedIds.has(doc.id)) {
+        deletePromises.push(deleteDoc(doc.ref));
+        deletedIds.add(doc.id);
+      }
+    });
+    
+    // Collect used one-time codes
+    usedOneTimeSnapshot.forEach((doc) => {
+      if (!deletedIds.has(doc.id)) {
+        deletePromises.push(deleteDoc(doc.ref));
+        deletedIds.add(doc.id);
+      }
     });
     
     await Promise.all(deletePromises);
-    return querySnapshot.size; // Return number of deleted codes
+    return deletedIds.size; // Return number of deleted codes
   } catch (error) {
     console.error('Error cleaning up expired codes:', error);
     throw error;

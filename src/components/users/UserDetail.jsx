@@ -58,15 +58,35 @@ const UserDetail = () => {
 
   const getVerificationBadge = (user) => {
     if (user.isVerified || user.verificationStatus === 'verified') {
-      return <Badge bg="success" className="fs-6 px-3 py-2">✓ Verified</Badge>;
+      return (
+        <Badge bg="success" className="fs-6 px-3 py-2">
+          <i className="bi bi-check-circle me-2"></i>
+          VERIFIED
+        </Badge>
+      );
     }
     if (user.verificationStatus === 'pending') {
-      return <Badge bg="warning" className="fs-6 px-3 py-2">⏳ Pending</Badge>;
+      return (
+        <Badge bg="warning" className="fs-6 px-3 py-2">
+          <i className="bi bi-clock me-2"></i>
+          PENDING
+        </Badge>
+      );
     }
     if (user.verificationStatus === 'rejected') {
-      return <Badge bg="danger" className="fs-6 px-3 py-2">✗ Rejected</Badge>;
+      return (
+        <Badge bg="danger" className="fs-6 px-3 py-2">
+          <i className="bi bi-x-circle me-2"></i>
+          REJECTED
+        </Badge>
+      );
     }
-    return <Badge bg="secondary" className="fs-6 px-3 py-2">Unverified</Badge>;
+    return (
+      <Badge bg="secondary" className="fs-6 px-3 py-2">
+        <i className="bi bi-dash-circle me-2"></i>
+        UNVERIFIED
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -154,7 +174,7 @@ const UserDetail = () => {
                 <p className="text-muted fs-5 mb-3">{user.email}</p>
                 <div className="d-flex justify-content-center gap-3">
                   <Badge bg="primary" className="fs-6 px-3 py-2">
-                    {user.role?.charAt(0).toUpperCase() + user.role?.slice(1)}
+                    {user.role?.toUpperCase()}
                   </Badge>
                   {getVerificationBadge(user)}
                 </div>

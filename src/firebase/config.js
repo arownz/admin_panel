@@ -20,7 +20,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Initialize Analytics only in production to avoid API key errors in development
+const analytics = typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
+  ? getAnalytics(app) 
+  : null;
 
 // Initialize services
 const db = getFirestore(app);

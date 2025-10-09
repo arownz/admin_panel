@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../hooks/useAuth';
 import { useSidebar } from '../hooks/useSidebar';
 
 const Sidebar = () => {
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed, toggleSidebar, isMobileOpen, isMobile, closeMobileSidebar } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -31,6 +32,13 @@ const Sidebar = () => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
+  const handleNavClick = (path) => {
+    navigate(path);
+    if (isMobile) {
+      closeMobileSidebar();
+    }
+  };
+
   const menuItems = [
     { path: '/dashboard', icon: 'bi-speedometer2', label: 'Dashboard' },
     { path: '/users', icon: 'bi-people', label: 'User Management' },
@@ -43,10 +51,22 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''} d-flex flex-column`} style={{ height: '100vh' }}>
+      {/* Sidebar Overlay for Mobile */}
+      {isMobile && (
+        <div
+          className={`sidebar-overlay ${isMobileOpen ? 'show' : ''}`}
+          onClick={closeMobileSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'show' : ''} d-flex flex-column`}
+        style={{ height: '100vh' }}
+      >
         <div className="sidebar-header p-3 border-bottom border-secondary">
           <div className="d-flex align-items-center justify-content-between">
-            {!isCollapsed && (
+            {(!isCollapsed || isMobile) && (
               <div className="d-flex align-items-center text-white">
                 <i className="bi bi-gear-wide-connected fs-3 text-primary me-2"></i>
                 <div>
@@ -55,16 +75,27 @@ const Sidebar = () => {
                 </div>
               </div>
             )}
-            {isCollapsed && (
+            {isCollapsed && !isMobile && (
               <i className="bi bi-gear-wide-connected fs-3 text-primary"></i>
             )}
-            <button
-              className="btn btn-link text-white p-1"
-              onClick={toggleSidebar}
-              style={{ fontSize: '1.2rem' }}
-            >
-              <i className={`bi ${isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'}`}></i>
-            </button>
+            {!isMobile && (
+              <button
+                className="btn btn-link text-white p-1"
+                onClick={toggleSidebar}
+                style={{ fontSize: '1.2rem' }}
+              >
+                <i className={`bi ${isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'}`}></i>
+              </button>
+            )}
+            {isMobile && (
+              <button
+                className="btn btn-link text-white p-1"
+                onClick={closeMobileSidebar}
+                style={{ fontSize: '1.2rem' }}
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
+            )}
           </div>
         </div>
 
@@ -72,19 +103,19 @@ const Sidebar = () => {
           <ul className="nav flex-column p-2 flex-grow-1">
             {menuItems.map((item) => (
               <li className="nav-item mb-2" key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`nav-link d-flex align-items-center text-white text-decoration-none rounded px-3 py-3 ${isActive(item.path) ? 'bg-primary' : ''
-                    }`}
+                <a
+                  onClick={() => handleNavClick(item.path)}
+                  className={`nav-link d-flex align-items-center text-white text-decoration-none rounded px-3 py-3 ${isActive(item.path) ? 'bg-primary' : ''}`}
                   style={{
                     minHeight: '50px',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
                   }}
-                  title={isCollapsed ? item.label : ''}
+                  title={(isCollapsed && !isMobile) ? item.label : ''}
                 >
-                  <i className={`${item.icon} ${isCollapsed ? '' : 'me-3'}`} style={{ fontSize: '1.2rem' }}></i>
-                  {!isCollapsed && <span style={{ fontSize: '1rem' }}>{item.label}</span>}
-                </Link>
+                  <i className={`${item.icon} ${(isCollapsed && !isMobile) ? '' : 'me-3'}`} style={{ fontSize: '1.2rem' }}></i>
+                  {(!isCollapsed || isMobile) && <span style={{ fontSize: '1rem' }}>{item.label}</span>}
+                </a>
               </li>
             ))}
           </ul>
@@ -93,13 +124,12 @@ const Sidebar = () => {
         <div className="sidebar-footer p-3 border-top border-secondary">
           <button
             onClick={handleLogoutClick}
-            className={`btn btn-outline-light w-100 d-flex align-items-center py-2 ${isCollapsed ? 'justify-content-center' : ''
-              }`}
+            className={`btn btn-outline-light w-100 d-flex align-items-center py-2 ${(isCollapsed && !isMobile) ? 'justify-content-center' : ''}`}
             style={{ minHeight: '45px' }}
-            title={isCollapsed ? 'Logout' : ''}
+            title={(isCollapsed && !isMobile) ? 'Logout' : ''}
           >
-            <i className={`bi bi-box-arrow-right ${isCollapsed ? '' : 'me-2'}`} style={{ fontSize: '1.1rem' }}></i>
-            {!isCollapsed && <span>Logout</span>}
+            <i className={`bi bi-box-arrow-right ${(isCollapsed && !isMobile) ? '' : 'me-2'}`} style={{ fontSize: '1.1rem' }}></i>
+            {(!isCollapsed || isMobile) && <span>Logout</span>}
           </button>
         </div>
       </div>
