@@ -161,9 +161,14 @@ const AppointmentDetail = () => {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1 className="display-6 mb-0">Appointment Details</h1>
             <div>
-              <Link to="/appointments" className="btn btn-secondary">
-                <i className="bi bi-arrow-left"></i> Back
-              </Link>
+              <Button
+                as={Link}
+                to="/appointments"
+                variant="outline-secondary"
+              >
+                <i className="bi bi-arrow-left me-2"></i>
+                Back to Appointments
+              </Button>
             </div>
           </div>
 

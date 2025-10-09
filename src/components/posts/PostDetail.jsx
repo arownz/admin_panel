@@ -155,13 +155,19 @@ const PostDetail = () => {
           {/* Update the button group in the header section - remove the Edit button */}
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1 className="display-6 mb-0">Post Details</h1>
-            <div>
-              <Link to="/posts" className="btn btn-secondary me-2">
-                <i className="bi bi-arrow-left"></i> Back
-              </Link>
+            <div className="d-flex gap-2">
+              <Button
+                as={Link}
+                to="/posts"
+                variant="outline-secondary"
+              >
+                <i className="bi bi-arrow-left me-2"></i>
+                Back to Posts
+              </Button>
               {/* Edit button removed */}
-              <Button variant="danger" onClick={handleDeleteClick}>
-                <i className="bi bi-trash"></i> Delete
+              <Button variant="danger" size="lg" onClick={handleDeleteClick}>
+                <i className="bi bi-trash me-2"></i>
+                Delete Post
               </Button>
             </div>
           </div>
@@ -303,11 +309,12 @@ const PostDetail = () => {
           <p className="text-danger">This action cannot be undone.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+          <Button variant="secondary" size="lg" onClick={() => setShowDeleteModal(false)}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={confirmDelete}>
-            Delete
+          <Button variant="danger" size="lg" onClick={confirmDelete}>
+            <i className="bi bi-trash me-2"></i>
+            Delete Post
           </Button>
         </Modal.Footer>
       </Modal>

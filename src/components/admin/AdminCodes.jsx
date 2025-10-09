@@ -276,16 +276,18 @@ const AdminCodes = () => {
                                 <div className="d-flex gap-2">
                                     <Button
                                         variant="primary"
+                                        size="lg"
                                         onClick={() => setShowGenerateModal(true)}
                                     >
-                                        <i className="bi bi-plus-circle me-1"></i>
+                                        <i className="bi bi-plus-circle me-2"></i>
                                         Generate New Code
                                     </Button>
                                     <Button
                                         variant="outline-warning"
+                                        size="lg"
                                         onClick={handleCleanupExpired}
                                     >
-                                        <i className="bi bi-trash me-1"></i>
+                                        <i className="bi bi-trash me-2"></i>
                                         Cleanup Expired
                                     </Button>
                                 </div>
@@ -539,11 +541,12 @@ const AdminCodes = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowGenerateModal(false)}>
+                    <Button variant="secondary" size="lg" onClick={() => setShowGenerateModal(false)}>
                         Close
                     </Button>
                     <Button
                         variant="primary"
+                        size="lg"
                         onClick={handleGenerateCode}
                         disabled={generating}
                     >
@@ -554,7 +557,7 @@ const AdminCodes = () => {
                             </>
                         ) : (
                             <>
-                                <i className="bi bi-key me-1"></i>
+                                <i className="bi bi-key me-2"></i>
                                 Generate Code
                             </>
                         )}
@@ -585,10 +588,11 @@ const AdminCodes = () => {
                     <p className="text-danger">This action cannot be undone.</p>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={cancelDelete}>
+                    <Button variant="secondary" size="lg" onClick={cancelDelete}>
                         Cancel
                     </Button>
-                    <Button variant="danger" onClick={confirmDelete}>
+                    <Button variant="danger" size="lg" onClick={confirmDelete}>
+                        <i className="bi bi-trash me-2"></i>
                         Delete Code
                     </Button>
                 </Modal.Footer>

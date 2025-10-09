@@ -322,20 +322,6 @@ const UserForm = () => {
                   </Col>
                 </Row>
 
-                <Form.Group className="mb-4">
-                  <Form.Check
-                    type="checkbox"
-                    name="isVerified"
-                    checked={formData.isVerified}
-                    onChange={handleChange}
-                    label="Mark as verified professional"
-                    className="text-success"
-                  />
-                  <Form.Text className="text-muted">
-                    This will give the user verified status and special privileges
-                  </Form.Text>
-                </Form.Group>
-
                 <div className="d-flex justify-content-between mt-4 pt-4 border-top">
                   <Button
                     variant="outline-secondary"
